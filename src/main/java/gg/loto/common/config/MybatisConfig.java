@@ -1,4 +1,4 @@
-package gg.loto.common;
+package gg.loto.common.config;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.JdbcType;
