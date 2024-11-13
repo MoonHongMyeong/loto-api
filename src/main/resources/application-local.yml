@@ -1,0 +1,9 @@
+spring:
+  logging:
+    level:
+      root: debug
+      org.springframework: debug
+  jpa:
+    show-sql: true
+    hibernate:
+      format_sql: true

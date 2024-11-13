@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: loto
+  profiles:
+    group:
+      test: 
+        - h2
+        - local
+      dev:
+        - mysql
+        - local
+      prod:
+        - prod
+    active: dev
