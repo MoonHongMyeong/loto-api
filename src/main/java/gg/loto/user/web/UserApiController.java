@@ -1,5 +1,6 @@
 package gg.loto.user.web;
 
+import gg.loto.global.auth.dto.SessionUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import gg.loto.user.web.dto.UserSaveRequest;
 import gg.loto.user.web.dto.UserResponse;
 import gg.loto.user.web.dto.UserUpdateRequest;
+import gg.loto.global.auth.LoginUser;
 import gg.loto.user.service.UserService;
 
 @RestController
@@ -22,8 +24,8 @@ public class UserApiController {
         return ResponseEntity.ok(userService.signUp(userSaveRequest));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateProfile(@PathVariable Long id, @RequestBody UserUpdateRequest userUpdateRequest) {
-        return ResponseEntity.ok(userService.updateProfile(id, userUpdateRequest));
+    @PutMapping
+    public ResponseEntity<UserResponse> updateProfile(@LoginUser SessionUser sessionUser, @RequestBody UserUpdateRequest userUpdateRequest) {
+        return ResponseEntity.ok(userService.updateProfile(sessionUser.getId(), userUpdateRequest));
     }
 }

@@ -1,6 +1,7 @@
 package gg.loto.auth.service;
 
 import gg.loto.auth.web.dto.LoginRequest;
+import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserService;
 import gg.loto.user.web.dto.UserResponse;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class SessionLoginService implements LoginService{
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse login(LoginRequest loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
 
@@ -32,7 +35,7 @@ public class SessionLoginService implements LoginService{
     }
 
     private void createSession(User user) {
-        session.setAttribute(SESSION_KEY, user.getId());
+        session.setAttribute(SESSION_KEY, new SessionUser(user));
         session.setMaxInactiveInterval(SESSION_EXPIRE_TIME);
     }
 
