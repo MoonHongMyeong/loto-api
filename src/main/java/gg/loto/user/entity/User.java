@@ -2,6 +2,7 @@ package gg.loto.user.entity;
 
 import gg.loto.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -33,4 +34,15 @@ public class User extends BaseEntity {
 
     @Column(name = "discord_avatar")
     private String discordAvatar;
+
+    @Builder
+    public User(String email, String password, String nickname, String apiKey, String discordId, String discordUsername, String discordAvatar) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.apiKey = apiKey;
+        this.discordId = discordId;
+        this.discordUsername = discordUsername;
+        this.discordAvatar = discordAvatar;
+    }
 }
