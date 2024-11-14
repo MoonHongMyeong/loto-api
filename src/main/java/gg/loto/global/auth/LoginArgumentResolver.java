@@ -3,6 +3,8 @@ package gg.loto.global.auth;
 import gg.loto.global.auth.dto.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -17,7 +19,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
     private final HttpSession session;
 
     @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+    public boolean supportsParameter(@NonNull MethodParameter parameter) {
         boolean isLoginUserAnnotation = parameter.getParameterAnnotation(LoginUser.class) != null;
         boolean isSessionUserClass = SessionUser.class.equals(parameter.getParameterType());
 
@@ -25,7 +27,10 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(@NonNull MethodParameter parameter
+                                , @Nullable ModelAndViewContainer mavContainer
+                                , @NonNull NativeWebRequest webRequest
+                                , @Nullable WebDataBinderFactory binderFactory) throws Exception {
         Object sessionUser = session.getAttribute(SESSION_KEY);
         if (sessionUser == null) {
             throw new RuntimeException("로그인이 필요한 서비스 입니다.");
