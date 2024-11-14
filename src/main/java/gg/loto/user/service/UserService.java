@@ -1,5 +1,6 @@
 package gg.loto.user.service;
 
+import gg.loto.auth.service.LoginService;
 import gg.loto.user.web.dto.UserUpdateRequest;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final LoginService loginService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     
@@ -71,5 +73,15 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public void withdraw(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
+        
+        userRepository.delete(user);
+        
+        loginService.logout();
     }
 }

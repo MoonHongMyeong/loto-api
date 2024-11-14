@@ -28,4 +28,10 @@ public class UserApiController {
     public ResponseEntity<UserResponse> updateProfile(@LoginUser SessionUser sessionUser, @RequestBody UserUpdateRequest userUpdateRequest) {
         return ResponseEntity.ok(userService.updateProfile(sessionUser.getId(), userUpdateRequest));
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> withdraw(@LoginUser SessionUser sessionUser) {
+        userService.withdraw(sessionUser.getId());
+        return ResponseEntity.ok().build();
+    }
 }
