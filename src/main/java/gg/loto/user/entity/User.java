@@ -4,10 +4,12 @@ import gg.loto.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "user")
+@NoArgsConstructor
+@Table(name = "users")
 public class User extends BaseEntity {
     @Id
     @Column(name = "id")
@@ -45,4 +47,13 @@ public class User extends BaseEntity {
         this.discordUsername = discordUsername;
         this.discordAvatar = discordAvatar;
     }
+
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void changeNickname(String newNickname) {
+        this.nickname = newNickname;
+    }
+
 }
