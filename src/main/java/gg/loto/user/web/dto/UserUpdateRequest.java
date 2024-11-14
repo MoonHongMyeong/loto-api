@@ -1,4 +1,4 @@
-package gg.loto.user.dto;
+package gg.loto.user.web.dto;
 
 import java.util.Optional;
 

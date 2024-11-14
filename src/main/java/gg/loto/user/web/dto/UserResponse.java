@@ -1,10 +1,10 @@
-package gg.loto.user.dto;
+package gg.loto.user.web.dto;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import gg.loto.user.entity.User;
+import gg.loto.user.domain.User;
 
 @Getter
 @NoArgsConstructor

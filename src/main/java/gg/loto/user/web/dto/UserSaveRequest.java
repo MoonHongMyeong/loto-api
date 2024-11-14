@@ -1,4 +1,4 @@
-package gg.loto.user.dto;
+package gg.loto.user.web.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import gg.loto.user.entity.User;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import gg.loto.user.domain.User;
 
 @Getter
 @NoArgsConstructor

@@ -1,8 +1,8 @@
 package gg.loto.user.service;
 
-import gg.loto.user.dto.UserResponse;
-import gg.loto.user.dto.UserSaveRequest;
-import gg.loto.user.entity.User;
+import gg.loto.user.web.dto.UserResponse;
+import gg.loto.user.web.dto.UserSaveRequest;
+import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

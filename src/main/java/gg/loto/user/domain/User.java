@@ -1,4 +1,4 @@
-package gg.loto.user.entity;
+package gg.loto.user.domain;
 
 import gg.loto.common.entity.BaseEntity;
 import jakarta.persistence.*;

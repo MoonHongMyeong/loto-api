@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
-import gg.loto.user.dto.UserSaveRequest;
-import gg.loto.user.dto.UserResponse;
-import gg.loto.user.dto.UserUpdateRequest;
+import gg.loto.user.web.dto.UserSaveRequest;
+import gg.loto.user.web.dto.UserResponse;
+import gg.loto.user.web.dto.UserUpdateRequest;
 import gg.loto.user.service.UserService;
 
 @RestController

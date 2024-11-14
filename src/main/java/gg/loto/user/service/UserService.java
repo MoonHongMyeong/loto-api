@@ -1,14 +1,14 @@
 package gg.loto.user.service;
 
-import gg.loto.user.dto.UserUpdateRequest;
+import gg.loto.user.web.dto.UserUpdateRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import gg.loto.user.dto.UserResponse;
-import gg.loto.user.dto.UserSaveRequest;
-import gg.loto.user.entity.User;
+import gg.loto.user.web.dto.UserResponse;
+import gg.loto.user.web.dto.UserSaveRequest;
+import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
 
 
