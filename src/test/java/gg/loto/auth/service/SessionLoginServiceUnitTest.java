@@ -1,6 +1,7 @@
 package gg.loto.auth.service;
 
 import gg.loto.auth.web.dto.LoginRequest;
+import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserService;
 import gg.loto.user.web.dto.UserResponse;
@@ -16,8 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,10 +61,10 @@ class SessionLoginServiceUnitTest {
             when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
             
             // when
-            UserResponse response = loginService.login(loginRequest);
+            loginService.login(loginRequest);
             
             // then
-            verify(session).setAttribute(eq("USER"), eq(response.getId()));
+            verify(session).setAttribute(eq("USER"), any(SessionUser.class));
             verify(session).setMaxInactiveInterval(anyInt());
         }
         
