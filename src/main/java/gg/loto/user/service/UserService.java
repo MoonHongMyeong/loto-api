@@ -84,4 +84,11 @@ public class UserService {
         
         loginService.logout();
     }
+
+    @Transactional(readOnly = true)
+    public UserResponse showProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
+        return UserResponse.of(user);
+    }
 }

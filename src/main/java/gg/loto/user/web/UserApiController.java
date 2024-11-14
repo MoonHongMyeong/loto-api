@@ -34,4 +34,9 @@ public class UserApiController {
         userService.withdraw(sessionUser.getId());
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMyProfile(@LoginUser SessionUser sessionUser){
+        return ResponseEntity.ok(userService.showProfile(sessionUser.getId()));
+    }
 }
