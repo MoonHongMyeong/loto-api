@@ -1,5 +1,7 @@
 package gg.loto.user.service;
 
+import gg.loto.user.dto.UserUpdateRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import gg.loto.user.repository.UserRepository;
 
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -29,5 +32,23 @@ public class UserService {
     public void validateDuplicateEmail(String email) {
         if (userRepository.findByEmail(email).isPresent()) 
             throw new RuntimeException("이미 존재하는 이메일입니다.");
+    }
+
+    public UserResponse updateProfile(Long id, UserUpdateRequest userUpdateRequest) {
+        if ( userUpdateRequest.hasNoChanges() )
+            throw new RuntimeException("잘못된 수정 요청입니다.");
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+
+        userUpdateRequest.getPassword()
+            .ifPresent(password -> user.changePassword(passwordEncoder.encode(password)));
+
+        userUpdateRequest.getNickname()
+            .ifPresent(nickname -> user.changeNickname(nickname));
+
+        userRepository.save(user);
+
+        return UserResponse.of(user);
     }
 }
