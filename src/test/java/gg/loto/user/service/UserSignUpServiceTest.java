@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -17,8 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
-public class UserServiceTest {
+public class UserSignUpServiceTest {
     @Autowired
     private UserService userService;
 
@@ -41,7 +43,7 @@ public class UserServiceTest {
                 .build();
 
         // when
-        UserResponse response = userService.createUser(request);
+        UserResponse response = userService.signUp(request);
 
         // then
         assertThat(response).isNotNull();
@@ -63,7 +65,7 @@ public class UserServiceTest {
                 .nickname("테스터1")
                 .build();
 
-        userService.createUser(request);
+        userService.signUp(request);
 
         UserSaveRequest duplicateRequest = UserSaveRequest.builder()
                 .email("test@example.com")
@@ -72,7 +74,7 @@ public class UserServiceTest {
                 .build();
 
         // when & then
-        assertThatThrownBy(() -> userService.createUser(duplicateRequest))
+        assertThatThrownBy(() -> userService.signUp(duplicateRequest))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("이미 존재하는 이메일입니다.");
     }

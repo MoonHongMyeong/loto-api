@@ -20,7 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserResponse createUser(UserSaveRequest userSaveRequest) {
+    public UserResponse signUp(UserSaveRequest userSaveRequest) {
         
         validateDuplicateEmail(userSaveRequest.getEmail());
         userSaveRequest.setEncodedPassword(passwordEncoder.encode(userSaveRequest.getPassword()));

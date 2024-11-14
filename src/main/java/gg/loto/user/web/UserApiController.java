@@ -18,8 +18,8 @@ public class UserApiController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserSaveRequest userSaveRequest) {
-        return ResponseEntity.ok(userService.createUser(userSaveRequest));
+    public ResponseEntity<UserResponse> signUp(@RequestBody UserSaveRequest userSaveRequest) {
+        return ResponseEntity.ok(userService.signUp(userSaveRequest));
     }
 
     @PutMapping("/{id}")
