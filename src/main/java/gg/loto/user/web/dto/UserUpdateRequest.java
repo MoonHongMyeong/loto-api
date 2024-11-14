@@ -4,11 +4,13 @@ import java.util.Optional;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class UserUpdateRequest {
-    private final String nickname;
-    private final String password;
+    private String nickname;
+    private String password;
 
     @Builder
     public UserUpdateRequest(String nickname, String password) {
@@ -16,17 +18,16 @@ public class UserUpdateRequest {
         this.password = password;
     }
 
+    public boolean hasNoChanges() {
+        return (nickname == null || nickname.isBlank()) && 
+               (password == null || password.isBlank());
+    }
+
     public Optional<String> getNickname() {
-        return Optional.ofNullable(nickname)
-                    .filter(n -> !n.trim().isEmpty());
+        return Optional.ofNullable(nickname).filter(n -> !n.isBlank());
     }
 
     public Optional<String> getPassword() {
-        return Optional.ofNullable(password)
-                    .filter(p -> !p.trim().isEmpty());
-    }
-
-    public boolean hasNoChanges() {
-        return getNickname().isEmpty() && getPassword().isEmpty();
+        return Optional.ofNullable(password).filter(p -> !p.isBlank());
     }
 }

@@ -37,20 +37,32 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfile(Long id, UserUpdateRequest userUpdateRequest) {
-        if ( userUpdateRequest.hasNoChanges() )
+    public UserResponse updateProfile(Long id, UserUpdateRequest request) {
+        if (request.hasNoChanges()) {
             throw new RuntimeException("잘못된 수정 요청입니다.");
+        }
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
-        userUpdateRequest.getPassword()
-            .ifPresent(password -> user.changePassword(passwordEncoder.encode(password)));
+        boolean hasChanges = false;
 
-        userUpdateRequest.getNickname()
-            .ifPresent(nickname -> user.changeNickname(nickname));
+        if (request.getNickname().isPresent()) {
+            String newNickname = request.getNickname().get();
+            if (!newNickname.equals(user.getNickname())) {
+                user.changeNickname(newNickname);
+                hasChanges = true;
+            }
+        }
 
-        userRepository.save(user);
+        if (request.getPassword().isPresent()) {
+            user.changePassword(passwordEncoder.encode(request.getPassword().get()));
+            hasChanges = true;
+        }
+
+        if (!hasChanges) {
+            throw new RuntimeException("잘못된 수정 요청입니다.");
+        }
 
         return UserResponse.of(user);
     }

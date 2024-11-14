@@ -1,4 +1,4 @@
-package gg.loto.common.config;
+package gg.loto.global.config;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

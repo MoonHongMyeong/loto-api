@@ -1,6 +1,6 @@
 package gg.loto.user.domain;
 
-import gg.loto.common.entity.BaseEntity;
+import gg.loto.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

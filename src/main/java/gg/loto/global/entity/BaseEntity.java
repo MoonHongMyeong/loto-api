@@ -1,4 +1,4 @@
-package gg.loto.common.entity;
+package gg.loto.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

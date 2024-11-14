@@ -1,4 +1,4 @@
-package gg.loto.common.config;
+package gg.loto.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
