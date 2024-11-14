@@ -198,9 +198,6 @@ class UserServiceUnitTest {
         void updateProfileBlankString() {
             // given
             Long userId = 1L;
-            User existingUser = User.builder()
-                    .nickname("기존닉네임")
-                    .build();   
             UserUpdateRequest request = UserUpdateRequest.builder()
                     .nickname("")
                     .build();       

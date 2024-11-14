@@ -75,7 +75,7 @@ public class UserUpdateProfileServiceTest {
         UserResponse response = userService.updateProfile(savedUser.getId(), request);
 
         // then
-        User updatedUser = userRepository.findById(savedUser.getId()).get();
+        User updatedUser = userRepository.findById(response.getId()).get();
         assertThat(passwordEncoder.matches(newPassword, updatedUser.getPassword())).isTrue();
     }
 

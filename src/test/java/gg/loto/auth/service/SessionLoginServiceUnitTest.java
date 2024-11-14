@@ -4,7 +4,6 @@ import gg.loto.auth.web.dto.LoginRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserService;
-import gg.loto.user.web.dto.UserResponse;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
