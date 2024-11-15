@@ -42,7 +42,7 @@ public class CharactersService {
     }
 
     @Transactional(readOnly = true)
-    public List<CharacterListResponse> getUserCharacters(User user) {
+    public List<CharacterListResponse> getUserCharacters(SessionUser user) {
         return charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(user.getId()).stream()
                 .map(CharacterListResponse::of)
                 .collect(Collectors.toList());
@@ -64,5 +64,12 @@ public class CharactersService {
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
 
         charactersRepository.delete(character);
+    }
+
+    @Transactional(readOnly = true)
+    public CharacterResponse getUserCharacter(SessionUser user, Long characterId) {
+        Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("캐릭터가 없습니다."));
+        return CharacterResponse.of(character);
     }
 }

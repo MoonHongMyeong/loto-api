@@ -248,35 +248,74 @@ public class CharacterServiceUnitTest {
                     .hasMessage("잘못된 요청입니다.");
         }
     }
-    @Test
-    @DisplayName("유저의 캐릭터 목록 조회")
-    void getUserCharactersSuccess() {
-        // given
-        User user = User.builder()
-                .nickname("기존닉네임")
-                .build();
-        ReflectionTestUtils.setField(user, "id", 1L);
 
-        Characters character = Characters.builder()
-                .user(user)
-                .serverName("테스트서버")
-                .characterName("테스트캐릭터")
-                .characterClassName("버서커")
-                .itemAvgLevel("1500.0")
-                .itemMaxLevel("1550.0")
-                .characterLevel(60)
-                .characterImage("image.jpg")
-                .build();
+    @Nested
+    @DisplayName("캐릭터 조회 테스트")
+    class SelectCharacter{
+        @Test
+        @DisplayName("유저의 캐릭터 목록 조회")
+        void getUserCharactersSuccess() {
+            // given
+            User user = User.builder()
+                    .nickname("기존닉네임")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
 
-        given(charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(user.getId()))
-                .willReturn(List.of(character));
+            Characters character = Characters.builder()
+                    .user(user)
+                    .serverName("테스트서버")
+                    .characterName("테스트캐릭터")
+                    .characterClassName("버서커")
+                    .itemAvgLevel("1500.0")
+                    .itemMaxLevel("1550.0")
+                    .characterLevel(60)
+                    .characterImage("image.jpg")
+                    .build();
 
-        // when
-        List<CharacterListResponse> result = charactersService.getUserCharacters(user);
+            given(charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(sessionUser.getId()))
+                    .willReturn(List.of(character));
 
-        // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getCharacterName()).isEqualTo(character.getCharacterName());
-        assertThat(result.get(0).getItemMaxLevel()).isEqualTo(character.getItemMaxLevel());
+            // when
+            List<CharacterListResponse> result = charactersService.getUserCharacters(sessionUser);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getCharacterName()).isEqualTo(character.getCharacterName());
+            assertThat(result.get(0).getItemMaxLevel()).isEqualTo(character.getItemMaxLevel());
+        }
+        @Test
+        @DisplayName("유저의 캐릭터 목록 조회")
+        void getUserCharacterSuccess() {
+            // given
+            User user = User.builder()
+                    .nickname("기존닉네임")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            Characters character = Characters.builder()
+                    .user(user)
+                    .serverName("테스트서버")
+                    .characterName("테스트캐릭터")
+                    .characterClassName("버서커")
+                    .itemAvgLevel("1500.0")
+                    .itemMaxLevel("1550.0")
+                    .characterLevel(60)
+                    .characterImage("image.jpg")
+                    .build();
+            ReflectionTestUtils.setField(character, "id", 1L);
+
+            given(charactersRepository.findByIdAndUserId(character.getId(), sessionUser.getId()))
+                    .willReturn(Optional.of(character));
+
+            // when
+            CharacterResponse result = charactersService.getUserCharacter(sessionUser, character.getId());
+
+            // then
+            assertThat(result.getCharacterName()).isEqualTo(character.getCharacterName());
+            assertThat(result.getItemMaxLevel()).isEqualTo(character.getItemMaxLevel());
+        }
     }
+
 }
