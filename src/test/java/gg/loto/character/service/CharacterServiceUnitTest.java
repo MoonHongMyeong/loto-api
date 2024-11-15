@@ -68,15 +68,12 @@ public class CharacterServiceUnitTest {
             given(charactersRepository.findByCharacterNameAndUserId(request.getCharacterName(), user.getId()))
                     .willReturn(Optional.empty());
             given(charactersRepository.save(any(Characters.class))).willReturn(savedCharacter);
-            given(charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(user.getId()))
-                    .willReturn(List.of(savedCharacter));
 
             // when
-            List<CharacterListResponse> result = charactersService.createCharacter(sessionUser, request);
+            CharacterResponse result = charactersService.createCharacter(sessionUser, request);
 
             // then
-            assertThat(result).hasSize(1);
-            assertThat(result.get(0).getCharacterName()).isEqualTo(request.getCharacterName());
+            assertThat(result.getCharacterName()).isEqualTo(request.getCharacterName());
             verify(charactersRepository).save(any(Characters.class));
         }
 

@@ -23,30 +23,17 @@ public class CharactersService {
     private final UserService userService;
 
     @Transactional
-    public List<CharacterListResponse> createCharacter(SessionUser sessionUser, CharacterSaveRequest dto) {
+    public CharacterResponse createCharacter(SessionUser sessionUser, CharacterSaveRequest dto) {
         User user = userService.getCurrentUser(sessionUser);
         validateDuplicateCharacter(dto.getCharacterName(), user.getId());
 
-        saveCharacter(dto, user);
+        Characters character = dto.toEntity(user);
 
-        return getUserCharacters(user);
+        Characters savedCharacter = charactersRepository.save(character);
+
+        return CharacterResponse.of(savedCharacter);
     }
-
-    private void saveCharacter(CharacterSaveRequest dto, User user) {
-        Characters character = Characters.builder()
-                .user(user)
-                .serverName(dto.getServerName())
-                .characterName(dto.getCharacterName())
-                .characterClassName(dto.getCharacterClassName())
-                .itemAvgLevel(dto.getItemAvgLevel())
-                .itemMaxLevel(dto.getItemMaxLevel())
-                .characterLevel(dto.getCharacterLevel())
-                .characterImage(dto.getCharacterImage())
-                .build();
-
-        charactersRepository.save(character);
-    }
-
+   
     private void validateDuplicateCharacter(String characterName, Long userId) {
         charactersRepository.findByCharacterNameAndUserId(characterName, userId)
                 .ifPresent(character -> {

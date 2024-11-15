@@ -1,7 +1,6 @@
 package gg.loto.character.web;
 
 import gg.loto.character.service.CharactersService;
-import gg.loto.character.web.dto.CharacterListResponse;
 import gg.loto.character.web.dto.CharacterResponse;
 import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
@@ -12,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/characters")
 @RequiredArgsConstructor
@@ -22,7 +19,7 @@ public class CharactersApiController {
     private final CharactersService charactersService;
 
     @PostMapping
-    public ResponseEntity<List<CharacterListResponse>> createCharacter(@LoginUser SessionUser user, @Valid @RequestBody CharacterSaveRequest dto){
+    public ResponseEntity<CharacterResponse> createCharacter(@LoginUser SessionUser user, @Valid @RequestBody CharacterSaveRequest dto){
         return ResponseEntity.ok(charactersService.createCharacter(user, dto));
     }
 
