@@ -38,3 +38,4 @@ out/
 
 ### prod ###
 application-prod.yml
+application-api.yml
