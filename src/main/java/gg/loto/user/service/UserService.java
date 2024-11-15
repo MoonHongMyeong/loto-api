@@ -1,6 +1,7 @@
 package gg.loto.user.service;
 
 import gg.loto.auth.service.LoginService;
+import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.web.dto.UserUpdateRequest;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -90,5 +91,11 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
         return UserResponse.of(user);
+    }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser(SessionUser sessionUser) {
+        return userRepository.findById(sessionUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
     }
 }

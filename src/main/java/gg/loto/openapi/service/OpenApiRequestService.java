@@ -3,7 +3,7 @@ package gg.loto.openapi.service;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.openapi.dto.CharacterOpenApiRequest;
 import gg.loto.openapi.dto.CharacterOpenApiResponse;
-import gg.loto.openapi.infrasturcture.client.LostarkApiClient;
+import gg.loto.openapi.infrastructure.client.LostarkApiClient;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class OpenApiRequestService {
 
     public CharacterOpenApiResponse getCharacterProfiles(CharacterOpenApiRequest dto, SessionUser sessionUser) {
         User user = userService.getCurrentUser(sessionUser);
-        
+
         String apiKey = determineApiKey(user);
 
         return lostarkApiClient.fetchCharacterProfile(dto.getCharacterName(), apiKey);

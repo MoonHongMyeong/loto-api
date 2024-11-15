@@ -1,4 +1,4 @@
-package gg.loto.openapi.infrasturcture.client;
+package gg.loto.openapi.infrastructure.client;
 
 import gg.loto.openapi.dto.CharacterOpenApiResponse;
 import lombok.RequiredArgsConstructor;
