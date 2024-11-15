@@ -170,7 +170,87 @@ public class CharacterServiceUnitTest {
                     .hasMessage("잘못된 요청입니다.");
         }
     }
+    @Nested
+    @DisplayName("캐릭터 삭제 테스트")
+    class DeleteCharacter {
 
+        @Test
+        @DisplayName("성공적으로 캐릭터를 삭제한다")
+        void success() {
+            // given
+            User user = User.builder()
+                    .nickname("테스트닉네임")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+            Long characterId = 1L;
+
+            Characters character = Characters.builder()
+                    .user(user)
+                    .characterName("테스트캐릭터")
+                    .build();
+
+            given(charactersRepository.findByIdAndUserId(characterId, user.getId()))
+                    .willReturn(Optional.of(character));
+
+            // when
+            charactersService.deleteCharacter(sessionUser, characterId);
+
+            // then
+            verify(charactersRepository).delete(character);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 캐릭터 삭제 시 예외가 발생한다")
+        void throwException_WhenCharacterNotFound() {
+            // given
+            User user = User.builder()
+                    .nickname("테스트닉네임")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+            Long characterId = 999L;
+
+            given(charactersRepository.findByIdAndUserId(characterId, user.getId()))
+                    .willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> charactersService.deleteCharacter(sessionUser, characterId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("잘못된 요청입니다.");
+        }
+
+        @Test
+        @DisplayName("다른 사용자의 캐릭터 삭제 시도 시 예외가 발생한다")
+        void throwException_WhenDeleteOtherUserCharacter() {
+            // given
+            User owner = User.builder()
+                    .nickname("테스트닉네임")
+                    .build();
+            ReflectionTestUtils.setField(owner, "id", 1L);
+
+            User otherUser = User.builder()
+                    .nickname("테스트닉네임2")
+                    .build();
+            ReflectionTestUtils.setField(otherUser, "id", 2L);
+
+            SessionUser sessionUser = new SessionUser(otherUser);
+            Long characterId = 1L;
+
+            Characters character = Characters.builder()
+                    .user(owner)
+                    .characterName("테스트캐릭터")
+                    .build();
+
+            given(charactersRepository.findByIdAndUserId(characterId, otherUser.getId()))
+                    .willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> charactersService.deleteCharacter(sessionUser, characterId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("잘못된 요청입니다.");
+        }
+    }
     @Test
     @DisplayName("유저의 캐릭터 목록 조회")
     void getUserCharactersSuccess() {

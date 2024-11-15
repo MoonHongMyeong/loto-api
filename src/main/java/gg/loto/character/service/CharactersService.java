@@ -62,8 +62,7 @@ public class CharactersService {
     }
 
     @Transactional
-    public CharacterResponse updateCharacter(SessionUser sessionUser, Long characterId, CharacterUpdateRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+    public CharacterResponse updateCharacter(SessionUser user, Long characterId, CharacterUpdateRequest dto) {
 
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
                 .orElseThrow(() -> new RuntimeException("잘못된 요청입니다."));
@@ -71,5 +70,12 @@ public class CharactersService {
         character.update(dto);
 
         return CharacterResponse.of(character);
+    }
+    @Transactional
+    public void deleteCharacter(SessionUser user, Long characterId) {
+        Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
+
+        charactersRepository.delete(character);
     }
 }

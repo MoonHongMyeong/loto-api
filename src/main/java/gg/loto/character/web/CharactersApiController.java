@@ -30,4 +30,10 @@ public class CharactersApiController {
     public ResponseEntity<CharacterResponse> updateCharacter(@LoginUser SessionUser user, @PathVariable Long characterId, @Valid @RequestBody CharacterUpdateRequest dto){
         return ResponseEntity.ok(charactersService.updateCharacter(user, characterId, dto));
     }
+
+    @DeleteMapping("/{characterId}")
+    public ResponseEntity<Void> deleteCharacter(@LoginUser SessionUser user, @PathVariable Long characterId){
+        charactersService.deleteCharacter(user, characterId);
+        return ResponseEntity.noContent().build();
+    }
 }
