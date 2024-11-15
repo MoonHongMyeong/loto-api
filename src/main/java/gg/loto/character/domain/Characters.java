@@ -1,5 +1,6 @@
 package gg.loto.character.domain;
 
+import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.entity.BaseEntity;
 import gg.loto.user.domain.User;
 import jakarta.persistence.*;
@@ -52,5 +53,14 @@ public class Characters extends BaseEntity {
         this.itemAvgLevel = itemAvgLevel;
         this.characterLevel = characterLevel;
         this.characterImage = characterImage;
+    }
+
+    public void update(CharacterUpdateRequest dto) {
+        this.characterName = dto.getCharacterName();
+        this.characterClassName = dto.getCharacterClassName();
+        this.characterImage = dto.getCharacterImage();
+        this.characterLevel = dto.getCharacterLevel();
+        this.itemMaxLevel = dto.getItemMaxLevel();
+        this.itemAvgLevel = dto.getItemAvgLevel();
     }
 }

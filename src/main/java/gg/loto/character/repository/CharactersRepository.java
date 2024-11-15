@@ -10,4 +10,6 @@ public interface CharactersRepository extends JpaRepository<Characters, Long> {
     List<Characters> findAllByUserIdOrderByItemMaxLevelDesc(Long id);
 
     Optional<Characters> findByCharacterNameAndUserId(String characterName, Long userId);
+
+    Optional<Characters> findByIdAndUserId(Long characterId, Long id);
 }
