@@ -1,0 +1,138 @@
+package gg.loto.character.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import gg.loto.character.domain.Characters;
+import gg.loto.character.repository.CharactersRepository;
+import gg.loto.character.web.dto.CharacterListResponse;
+import gg.loto.character.web.dto.CharacterSaveRequest;
+import gg.loto.global.auth.dto.SessionUser;
+import gg.loto.user.domain.User;
+import gg.loto.user.service.UserService;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
+public class CharacterServiceUnitTest {
+    @InjectMocks
+    private CharactersService charactersService;
+
+    @Mock
+    private CharactersRepository charactersRepository;
+
+    @Mock
+    private UserService userService;
+
+    @Test
+    @DisplayName("캐릭터 생성 성공")
+    void createCharacter_Success() {
+        // given
+        User user = User.builder()
+                .nickname("기존닉네임")
+                .build();
+        ReflectionTestUtils.setField(user, "id", 1L);
+        
+        SessionUser sessionUser = new SessionUser(user);
+        
+        CharacterSaveRequest request = CharacterSaveRequest.builder()
+                .serverName("테스트서버")
+                .characterName("테스트캐릭터")
+                .characterClassName("버서커")
+                .itemAvgLevel("1600.0")
+                .itemMaxLevel("1650.0")
+                .characterLevel(60)
+                .characterImage("image.jpg")
+                .build();
+
+        Characters savedCharacter = request.toEntity(user);
+
+        given(userService.getCurrentUser(any(SessionUser.class))).willReturn(user);
+        given(charactersRepository.findByCharacterNameAndUserId(request.getCharacterName(), user.getId()))
+                .willReturn(Optional.empty());
+        given(charactersRepository.save(any(Characters.class))).willReturn(savedCharacter);
+        given(charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(user.getId()))
+                .willReturn(List.of(savedCharacter));
+
+        // when
+        List<CharacterListResponse> result = charactersService.createCharacter(sessionUser, request);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCharacterName()).isEqualTo(request.getCharacterName());
+        verify(charactersRepository).save(any(Characters.class));
+    }
+
+    @Test
+    @DisplayName("중복된 캐릭터 생성 시 예외 발생")
+    void createCharacter_DuplicateCharacter() {
+        // given
+        User user = User.builder()
+                .nickname("기존닉네임")
+                .build();
+        ReflectionTestUtils.setField(user, "id", 1L);
+        
+        SessionUser sessionUser = new SessionUser(user);
+        
+        CharacterSaveRequest request = CharacterSaveRequest.builder()
+                .characterName("테스트캐릭터")
+                .build();
+
+        Characters existingCharacter = Characters.builder()
+                .user(user)
+                .characterName("테스트캐릭터")
+                .build();
+
+        given(userService.getCurrentUser(any(SessionUser.class))).willReturn(user);
+        given(charactersRepository.findByCharacterNameAndUserId(request.getCharacterName(), user.getId()))
+                .willReturn(Optional.of(existingCharacter));
+
+        // when & then
+        assertThatThrownBy(() -> charactersService.createCharacter(sessionUser, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 존재하는 캐릭터입니다.");
+    }
+
+    @Test
+    @DisplayName("유저의 캐릭터 목록 조회")
+    void getUserCharacters_Success() {
+        // given
+        User user = User.builder()
+                .nickname("기존닉네임")
+                .build();
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        Characters character = Characters.builder()
+                .user(user)
+                .serverName("테스트서버")
+                .characterName("테스트캐릭터")
+                .characterClassName("버서커")
+                .itemAvgLevel("1500.0")
+                .itemMaxLevel("1550.0")
+                .characterLevel(60)
+                .characterImage("image.jpg")
+                .build();
+
+        given(charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(user.getId()))
+                .willReturn(List.of(character));
+
+        // when
+        List<CharacterListResponse> result = charactersService.getUserCharacters(user);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCharacterName()).isEqualTo(character.getCharacterName());
+        assertThat(result.get(0).getItemMaxLevel()).isEqualTo(character.getItemMaxLevel());
+    }
+}
