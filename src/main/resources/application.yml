@@ -6,9 +6,11 @@ spring:
       test: 
         - h2
         - local
+        - api
       dev:
         - mysql
         - local
+        - api
       prod:
         - prod
     active: dev
