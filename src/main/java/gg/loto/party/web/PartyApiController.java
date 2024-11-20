@@ -5,13 +5,11 @@ import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.service.PartyService;
 import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.party.web.dto.PartySaveRequest;
+import gg.loto.party.web.dto.PartyUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/party")
@@ -22,5 +20,10 @@ public class PartyApiController {
     @PostMapping
     public ResponseEntity<PartyResponse> createParty(@LoginUser SessionUser user, @Valid @RequestBody PartySaveRequest dto){
         return ResponseEntity.ok(partyService.createParty(user, dto));
+    }
+
+    @PutMapping("/{partyId}")
+    public ResponseEntity<PartyResponse> updateParty(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId, @Valid @RequestBody PartyUpdateRequest dto){
+        return ResponseEntity.ok(partyService.updateParty(user, partyId, dto));
     }
 }

@@ -1,6 +1,7 @@
 package gg.loto.party.domain;
 
 import gg.loto.global.entity.BaseEntity;
+import gg.loto.party.web.dto.PartyUpdateRequest;
 import gg.loto.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -36,5 +37,11 @@ public class Party extends BaseEntity {
         this.name = name;
         this.capacity = capacity;
         this.partyType = partyType;
+    }
+
+    public void update(PartyUpdateRequest dto){
+        this.name = dto.getName();
+        this.capacity = dto.getCapacity();
+        this.partyType = PartyType.valueOf(dto.getPartyType());
     }
 }

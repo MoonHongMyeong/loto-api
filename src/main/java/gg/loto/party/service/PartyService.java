@@ -5,6 +5,7 @@ import gg.loto.party.domain.Party;
 import gg.loto.party.repository.PartyRepository;
 import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.party.web.dto.PartySaveRequest;
+import gg.loto.party.web.dto.PartyUpdateRequest;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,22 @@ public class PartyService {
                 .ifPresent(character -> {
                     throw new IllegalArgumentException("이미 존재하는 공유방입니다.");
                 });
+    }
+
+    @Transactional
+    public PartyResponse updateParty(SessionUser sessionUser, Long partyId, PartyUpdateRequest dto) {
+        User user = userService.getCurrentUser(sessionUser);
+
+        Party party = partyRepository.findById(partyId).orElseThrow(() -> {
+            throw new IllegalArgumentException("잘못된 공유방 번호 입니다.");
+        });
+
+        if (party.getUser().getId() != user.getId()){
+            throw new RuntimeException("권한이 없는 요청입니다.");
+        }
+
+        party.update(dto);
+
+        return PartyResponse.of(party);
     }
 }
