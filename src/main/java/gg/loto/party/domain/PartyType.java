@@ -10,5 +10,6 @@ public enum PartyType {
     private String typeKor;
 
     PartyType(String typeKor) {
+        this.typeKor = typeKor;
     }
 }
