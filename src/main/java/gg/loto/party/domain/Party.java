@@ -24,17 +24,17 @@ public class Party extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "limit", nullable = false)
-    private int limit;
+    @Column(name = "capacity", nullable = false)
+    private int capacity;
 
     @Column(name = "party_type", nullable = false)
     private PartyType partyType;
 
     @Builder
-    public Party(User user, String name, int limit, PartyType partyType){
+    public Party(User user, String name, int capacity, PartyType partyType){
         this.user = user;
         this.name = name;
-        this.limit = limit;
+        this.capacity = capacity;
         this.partyType = partyType;
     }
 }
