@@ -44,4 +44,8 @@ public class Party extends BaseEntity {
         this.capacity = dto.getCapacity();
         this.partyType = PartyType.valueOf(dto.getPartyType());
     }
+
+    public void transferLeadership(User newLeader) {
+        this.user = newLeader;
+    }
 }

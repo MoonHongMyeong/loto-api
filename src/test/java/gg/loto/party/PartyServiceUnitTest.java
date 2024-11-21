@@ -217,4 +217,145 @@ class PartyServiceUnitTest {
                     .hasMessage("권한이 없는 요청입니다.");
         }
     }
+
+    @Nested
+    @DisplayName("방장 권한 위임 기능")
+    class transferLeadership {
+        @Test
+        @DisplayName("방장 권한 위임이 정상적으로 동작한다")
+        void success() {
+            // given
+            Long partyId = 1L;
+            User currentLeader = User.builder()
+                    .nickname("현재방장")
+                    .discordUsername("leader#1234")
+                    .build();
+            ReflectionTestUtils.setField(currentLeader, "id", 1L);
+
+            User newLeader = User.builder()
+                    .nickname("새방장")
+                    .discordUsername("newleader#1234")
+                    .build();
+            ReflectionTestUtils.setField(newLeader, "id", 2L);
+
+            Party party = Party.builder()
+                    .user(currentLeader)
+                    .name("테스트파티")
+                    .capacity(5)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", partyId);
+
+            SessionUser sessionUser = new SessionUser(currentLeader);
+
+            given(userService.getCurrentUser(sessionUser)).willReturn(currentLeader);
+            given(partyRepository.findById(partyId)).willReturn(Optional.of(party));
+            given(userService.findById(newLeader.getId())).willReturn(newLeader);
+
+            // when
+            PartyResponse response = partyService.transferLeadership(sessionUser, partyId, newLeader.getId());
+
+            // then
+            assertThat(response.getNickname()).isEqualTo(newLeader.getNickname());
+            verify(userService).getCurrentUser(sessionUser);
+            verify(partyRepository).findById(partyId);
+            verify(userService).findById(newLeader.getId());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 공유방 ID로 권한 위임 요청시 예외가 발생한다")
+        void transferLeadershipWithInvalidPartyId() {
+            // given
+            Long invalidPartyId = 999L;
+            User currentLeader = User.builder()
+                    .nickname("현재방장")
+                    .discordUsername("leader#1234")
+                    .build();
+            ReflectionTestUtils.setField(currentLeader, "id", 1L);
+
+            SessionUser sessionUser = new SessionUser(currentLeader);
+            Long newLeaderId = 2L;
+
+            given(userService.getCurrentUser(sessionUser)).willReturn(currentLeader);
+            given(partyRepository.findById(invalidPartyId)).willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() ->
+                    partyService.transferLeadership(sessionUser, invalidPartyId, newLeaderId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("잘못된 공유방 번호 입니다.");
+        }
+
+        @Test
+        @DisplayName("방장이 아닌 사용자가 권한 위임 요청시 예외가 발생한다")
+        void transferLeadershipWithoutOwnership() {
+            // given
+            Long partyId = 1L;
+            User currentLeader = User.builder()
+                    .nickname("현재방장")
+                    .discordUsername("leader#1234")
+                    .build();
+            ReflectionTestUtils.setField(currentLeader, "id", 1L);
+
+            User otherUser = User.builder()
+                    .nickname("다른유저")
+                    .discordUsername("other#1234")
+                    .build();
+            ReflectionTestUtils.setField(otherUser, "id", 2L);
+
+            Party party = Party.builder()
+                    .user(currentLeader)
+                    .name("테스트파티")
+                    .capacity(5)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", partyId);
+
+            SessionUser sessionUser = new SessionUser(otherUser);
+            Long newLeaderId = 3L;
+
+            given(userService.getCurrentUser(sessionUser)).willReturn(otherUser);
+            given(partyRepository.findById(partyId)).willReturn(Optional.of(party));
+
+            // when & then
+            assertThatThrownBy(() ->
+                    partyService.transferLeadership(sessionUser, partyId, newLeaderId))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessage("권한이 없는 요청입니다.");
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 사용자에게 권한 위임 요청시 예외가 발생한다")
+        void transferLeadershipToInvalidUser() {
+            // given
+            Long partyId = 1L;
+            Long invalidUserId = 999L;
+            User currentLeader = User.builder()
+                    .nickname("현재방장")
+                    .discordUsername("leader#1234")
+                    .build();
+            ReflectionTestUtils.setField(currentLeader, "id", 1L);
+
+            Party party = Party.builder()
+                    .user(currentLeader)
+                    .name("테스트파티")
+                    .capacity(5)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", partyId);
+
+            SessionUser sessionUser = new SessionUser(currentLeader);
+
+            given(userService.getCurrentUser(sessionUser)).willReturn(currentLeader);
+            given(partyRepository.findById(partyId)).willReturn(Optional.of(party));
+            given(userService.findById(invalidUserId))
+                    .willThrow(new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
+
+            // when & then
+            assertThatThrownBy(() ->
+                    partyService.transferLeadership(sessionUser, partyId, invalidUserId))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("회원정보를 찾을 수 없습니다.");
+        }
+    }
 }

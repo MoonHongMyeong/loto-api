@@ -26,4 +26,9 @@ public class PartyApiController {
     public ResponseEntity<PartyResponse> updateParty(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId, @Valid @RequestBody PartyUpdateRequest dto){
         return ResponseEntity.ok(partyService.updateParty(user, partyId, dto));
     }
+
+    @PutMapping("/{partyId}/leader/{userId}")
+    public ResponseEntity<PartyResponse> transferLeadership(@LoginUser SessionUser user, @PathVariable(name="partyId") Long partyId, @PathVariable(name="userId") Long userId){
+        return ResponseEntity.ok(partyService.transferLeadership(user, partyId, userId));
+    }
 }

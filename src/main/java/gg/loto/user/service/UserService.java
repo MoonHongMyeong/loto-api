@@ -98,4 +98,10 @@ public class UserService {
         return userRepository.findById(sessionUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
     }
+
+    @Transactional(readOnly = true)
+    public User findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
+    }
 }
