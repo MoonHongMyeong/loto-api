@@ -1,5 +1,6 @@
 package gg.loto.party.domain;
 
+import gg.loto.character.domain.Characters;
 import gg.loto.global.entity.BaseEntity;
 import gg.loto.party.web.dto.PartyUpdateRequest;
 import gg.loto.user.domain.User;
@@ -7,6 +8,9 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -30,6 +34,21 @@ public class Party extends BaseEntity {
 
     @Column(name = "party_type", nullable = false)
     private PartyType partyType;
+
+    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartyMember> members = new ArrayList<>();
+
+    public void addMember(Characters character){
+        PartyMember member = PartyMember.builder()
+                .party(this)
+                .character(character)
+                .build();
+        this.members.add(member);
+    }
+
+    public void removeMember(Characters character){
+        this.members.removeIf(member -> member.getCharacter().equals(character));
+    }
 
     @Builder
     public Party(User user, String name, int capacity, PartyType partyType){
