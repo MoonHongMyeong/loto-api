@@ -8,9 +8,11 @@ import gg.loto.user.domain.User;
 import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
+@Profile("api")
 @RequiredArgsConstructor
 public class OpenApiRequestService {
     @Value("${lostark.api-key}")
