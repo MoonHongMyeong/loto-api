@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,7 +76,7 @@ public class CharactersService {
     }
 
     @Transactional(readOnly = true)
-    public List<Characters> findAllById(List<Long> charactersId) {
+    public List<Characters> findAllById(Set<Long> charactersId) {
         return charactersRepository.findAllById(charactersId);
     }
 
@@ -84,7 +85,7 @@ public class CharactersService {
                 .anyMatch(character -> !character.getUser().equals(user));
         
         if (hasInvalidCharacterOwnership){
-            throw new RuntimeException("본인이 등록한 캐릭터만 공유방에 참여할 수 있습니다.");
+            throw new RuntimeException("본인이 등록한 캐릭터만 공유방에 참여, 탈퇴 할 수 있습니다.");
         }
     }
 }

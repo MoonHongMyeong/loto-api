@@ -1,9 +1,8 @@
 package gg.loto.party.mapper;
 
-import gg.loto.party.domain.Party;
 import org.apache.ibatis.annotations.Mapper;
 
-import java.util.List;
+import java.util.Set;
 
 @Mapper
 public interface PartyMapper {
@@ -12,5 +11,7 @@ public interface PartyMapper {
 
     boolean isAlreadyJoinedUser(Long partyId, Long userId);
 
-    boolean isAlreadyJoinedCharacter(Long partyId, List<Long> characterIds);
+    boolean isAlreadyJoinedCharacter(Long partyId, Set<Long> characterIds);
+
+    int getPartyLeaderCharactersSize(Long partyId);
 }

@@ -6,9 +6,10 @@ import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.domain.Party;
 import gg.loto.party.domain.PartyType;
 import gg.loto.party.mapper.PartyMapper;
+import gg.loto.party.repository.PartyMemberRepository;
 import gg.loto.party.repository.PartyRepository;
 import gg.loto.party.service.PartyService;
-import gg.loto.party.web.dto.PartyJoinRequest;
+import gg.loto.party.web.dto.PartyMemberRequest;
 import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.party.web.dto.PartySaveRequest;
 import gg.loto.party.web.dto.PartyUpdateRequest;
@@ -23,9 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,6 +50,9 @@ class PartyServiceUnitTest {
 
     @Mock
     private PartyMapper partyMapper;
+
+    @Mock
+    private PartyMemberRepository partyMemberRepository;
 
     @Nested
     @DisplayName("공유방 생성 기능")
@@ -184,7 +186,7 @@ class PartyServiceUnitTest {
             assertThatThrownBy(() ->
                     partyService.updateParty(sessionUser, invalidPartyId, updateRequest))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("잘못된 공유방 번호 입니다.");
+                    .hasMessage("잘못된 공유방입니다.");
         }
 
         @Test
@@ -296,7 +298,7 @@ class PartyServiceUnitTest {
             assertThatThrownBy(() ->
                     partyService.transferLeadership(sessionUser, invalidPartyId, newLeaderId))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("잘못된 공유방 번호 입니다.");
+                    .hasMessage("잘못된 공유방입니다.");
         }
 
         @Test
@@ -403,7 +405,7 @@ class PartyServiceUnitTest {
             characters.add(character1);
             characters.add(character2);
 
-            PartyJoinRequest request = PartyJoinRequest.builder()
+            PartyMemberRequest request = PartyMemberRequest.builder()
                     .characters(characterIds)
                     .build();
 
@@ -412,8 +414,8 @@ class PartyServiceUnitTest {
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
             when(partyMapper.getJoinedMemberSize(party.getId())).thenReturn(2);
-            when(characterService.findAllById(characterIds)).thenReturn(characters);
-            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), characterIds)).thenReturn(false);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(false);
 
             // then
             PartyResponse response = partyService.joinParty(sessionUser, 1L, request);
@@ -423,8 +425,8 @@ class PartyServiceUnitTest {
                     () -> assertEquals(party.getName(), response.getName()),
                     () -> verify(partyMapper).isAlreadyJoinedUser(party.getId(), user.getId()),
                     () -> verify(partyMapper).getJoinedMemberSize(party.getId()),
-                    () -> verify(characterService).findAllById(characterIds),
-                    () -> verify(partyMapper).isAlreadyJoinedCharacter(party.getId(), characterIds)
+                    () -> verify(characterService).findAllById(request.getCharacters()),
+                    () -> verify(partyMapper).isAlreadyJoinedCharacter(party.getId(), request.getCharacters())
             );
         }
 
@@ -462,7 +464,7 @@ class PartyServiceUnitTest {
             characters.add(character1);
             characters.add(character2);
 
-            PartyJoinRequest request = PartyJoinRequest.builder()
+            PartyMemberRequest request = PartyMemberRequest.builder()
                     .characters(characterIds)
                     .build();
 
@@ -471,8 +473,8 @@ class PartyServiceUnitTest {
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(partyMapper.isAlreadyJoinedUser(party.getId(), another.getId())).thenReturn(false);
             when(partyMapper.getJoinedMemberSize(party.getId())).thenReturn(2);
-            when(characterService.findAllById(characterIds)).thenReturn(characters);
-            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), characterIds)).thenReturn(false);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(false);
 
             // then
             PartyResponse response = partyService.joinParty(sessionUser, 1L, request);
@@ -482,13 +484,13 @@ class PartyServiceUnitTest {
                     () -> assertEquals(party.getName(), response.getName()),
                     () -> verify(partyMapper).isAlreadyJoinedUser(party.getId(), another.getId()),
                     () -> verify(partyMapper).getJoinedMemberSize(party.getId()),
-                    () -> verify(characterService).findAllById(characterIds),
-                    () -> verify(partyMapper).isAlreadyJoinedCharacter(party.getId(), characterIds)
+                    () -> verify(characterService).findAllById(request.getCharacters()),
+                    () -> verify(partyMapper).isAlreadyJoinedCharacter(party.getId(), request.getCharacters())
             );
         }
 
         @Test
-        @DisplayName("이미 가입된 유저의 파티 가입 시도 - 성공")
+        @DisplayName("이미 가입된 유저의 공유방 가입 시도 - 성공")
         void joinParty_AlreadyJoinedUser_Success() {
             // given
             User user = User.builder().email("test@test.com").nickname("tester").build();
@@ -508,14 +510,14 @@ class PartyServiceUnitTest {
             Characters character1 = Characters.builder().user(user).characterName("테스트캐릭터1").build();
             ReflectionTestUtils.setField(character1, "id", 1L);
             characters.add(character1);
-            PartyJoinRequest request = new PartyJoinRequest(characterIds);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
 
             // when
             when(userService.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(true);
-            when(characterService.findAllById(characterIds)).thenReturn(characters);
-            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), characterIds)).thenReturn(false);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(false);
 
             // then
             PartyResponse response = partyService.joinParty(sessionUser, 1L, request);
@@ -526,7 +528,7 @@ class PartyServiceUnitTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 캐릭터로 파티 가입 시도 - 실패")
+        @DisplayName("존재하지 않는 캐릭터로 공유방 가입 시도 - 실패")
         void joinParty_NonExistentCharacter_ThrowsException() {
             // given
             User user = User.builder().email("test@test.com").nickname("tester").build();
@@ -545,13 +547,13 @@ class PartyServiceUnitTest {
             Characters character1 = Characters.builder().user(user).characterName("테스트캐릭터1").build();
             ReflectionTestUtils.setField(character1, "id", 1L);
             characters.add(character1);
-            PartyJoinRequest request = new PartyJoinRequest(characterIds);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
 
             // when
             when(userService.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
-            when(characterService.findAllById(characterIds)).thenReturn(characters);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
 
             // then
             assertThrows(RuntimeException.class, () ->
@@ -561,7 +563,7 @@ class PartyServiceUnitTest {
         }
 
         @Test
-        @DisplayName("파티 정원 초과로 가입 실패")
+        @DisplayName("공유방 정원 초과로 가입 실패")
         void joinParty_ExceedCapacity_ThrowsException() {
             // given
             User user = User.builder().email("test@test.com").nickname("tester").build();
@@ -575,7 +577,7 @@ class PartyServiceUnitTest {
                     .build();
             ReflectionTestUtils.setField(party, "id", 1L);
 
-            PartyJoinRequest request = new PartyJoinRequest(List.of(1L));
+            PartyMemberRequest request = new PartyMemberRequest(List.of(1L));
 
             // when
             when(userService.getCurrentUser(sessionUser)).thenReturn(user);
@@ -591,7 +593,7 @@ class PartyServiceUnitTest {
         }
 
         @Test
-        @DisplayName("다른 유저의 캐릭터로 파티 가입 시도 - 실패")
+        @DisplayName("다른 유저의 캐릭터로 공유방 가입 시도 - 실패")
         void joinParty_WithOtherUserCharacter_ThrowsException() {
             // given
             User user = User.builder().email("test@test.com").nickname("tester").build();
@@ -618,13 +620,13 @@ class PartyServiceUnitTest {
             ReflectionTestUtils.setField(otherUserCharacter, "id", 1L);
             characters.add(otherUserCharacter);
 
-            PartyJoinRequest request = new PartyJoinRequest(characterIds);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
 
             // when
             when(userService.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
-            when(characterService.findAllById(characterIds)).thenReturn(characters);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
 
             // then
             assertThrows(RuntimeException.class, () ->
@@ -657,20 +659,273 @@ class PartyServiceUnitTest {
             ReflectionTestUtils.setField(character, "id", 1L);
             characters.add(character);
 
-            PartyJoinRequest request = new PartyJoinRequest(characterIds);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
 
             // when
             when(userService.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
-            when(characterService.findAllById(characterIds)).thenReturn(characters);
-            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), characterIds)).thenReturn(true);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(true);
 
             // then
             assertThrows(RuntimeException.class, () ->
                             partyService.joinParty(sessionUser, 1L, request),
                     "중복된 캐릭터 참여입니다."
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("공유방 탈퇴 테스트")
+    class LeaveParty {
+        @Test
+        @DisplayName("공유방 탈퇴 - 정상 케이스")
+        void leaveParty_Success() {
+            // given
+            User user = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+
+            Party party = Party.builder()
+                    .user(user)
+                    .name("테스트파티")
+                    .capacity(4)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+
+            User otherUser = User.builder()
+                    .email("test2@test.com")
+                    .nickname("tester2")
+                    .build();
+            ReflectionTestUtils.setField(otherUser, "id", 2L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            List<Characters> characters = new ArrayList<>();
+            Characters character1 = Characters.builder()
+                    .user(otherUser)
+                    .characterName("테스트캐릭터1")
+                    .build();
+            Characters character2 = Characters.builder()
+                    .user(otherUser)
+                    .characterName("테스트캐릭터2")
+                    .build();
+            ReflectionTestUtils.setField(character1, "id", 1L);
+            ReflectionTestUtils.setField(character2, "id", 2L);
+            characters.add(character1);
+            characters.add(character2);
+
+            List<Long> characterIds = List.of(1L, 2L);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
+
+            when(userService.getCurrentUser(sessionUser)).thenReturn(otherUser);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(partyMapper.isAlreadyJoinedUser(1L, 2L)).thenReturn(true);
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedCharacter(1L, request.getCharacters())).thenReturn(true);
+
+            // when
+            assertDoesNotThrow(() -> partyService.leaveParty(sessionUser, 1L, request));
+
+            // then
+            verify(partyMemberRepository).deleteByPartyIdAndCharacterIdIn(1L, request.getCharacters());
+        }
+
+        @Test
+        @DisplayName("공유방 탈퇴 - 방장이 일부 캐릭터만 탈퇴")
+        void leaveParty_PartyLeaderPartialLeave() {
+            // given
+            User user = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            Party party = Party.builder()
+                    .user(user)
+                    .name("테스트파티")
+                    .capacity(4)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+
+            List<Characters> characters = new ArrayList<>();
+            Characters character1 = Characters.builder()
+                    .user(user)
+                    .characterName("테스트캐릭터1")
+                    .build();
+            Characters character2 = Characters.builder()
+                    .user(user)
+                    .characterName("테스트캐릭터2")
+                    .build();
+            ReflectionTestUtils.setField(character1, "id", 1L);
+            ReflectionTestUtils.setField(character2, "id", 2L);
+            characters.add(character1);
+            characters.add(character2);
+
+            List<Long> characterIds = List.of(1L, 2L, 1L);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
+
+            when(userService.getCurrentUser(sessionUser)).thenReturn(user);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedUser(1L, 1L)).thenReturn(true);
+            when(partyMapper.isAlreadyJoinedCharacter(1L, request.getCharacters())).thenReturn(true);
+            when(partyMapper.getPartyLeaderCharactersSize(1L)).thenReturn(3); // 전체 3개 중 2개 탈퇴
+
+            // when
+            assertDoesNotThrow(() -> partyService.leaveParty(sessionUser, 1L, request));
+
+            // then
+            verify(partyMemberRepository).deleteByPartyIdAndCharacterIdIn(1L, request.getCharacters());
+        }
+
+        @Test
+        @DisplayName("공유방 탈퇴 - 중복된 캐릭터 ID가 요청되어도 정상 처리")
+        void leaveParty_WithDuplicateCharacterIds() {
+            // given
+            User user = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+
+            User other = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .build();
+            ReflectionTestUtils.setField(other, "id", 2L);
+            SessionUser sessionUser = new SessionUser(other);
+
+            Party party = Party.builder()
+                    .user(user)
+                    .name("테스트파티")
+                    .capacity(4)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+
+            List<Long> duplicateIds = Arrays.asList(1L, 1L, 2L);
+            PartyMemberRequest request = new PartyMemberRequest(duplicateIds);
+
+            Characters character1 = Characters.builder()
+                    .user(other)
+                    .characterName("테스트캐릭터1")
+                    .build();
+            Characters character2 = Characters.builder()
+                    .user(other)
+                    .characterName("테스트캐릭터2")
+                    .build();
+            Characters character3 = Characters.builder()
+                    .user(other)
+                    .characterName("남아있을_캐릭터")
+                    .build();
+            ReflectionTestUtils.setField(character1, "id", 1L);
+            ReflectionTestUtils.setField(character2, "id", 2L);
+            ReflectionTestUtils.setField(character3, "id", 3L);
+
+            when(userService.getCurrentUser(sessionUser)).thenReturn(other);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(partyMapper.isAlreadyJoinedUser(1L, other.getId())).thenReturn(true);
+            when(characterService.findAllById(any(Set.class))).thenReturn(List.of(character1, character2));
+            when(partyMapper.isAlreadyJoinedCharacter(eq(1L), any(Set.class))).thenReturn(true);
+
+            // when
+            assertDoesNotThrow(() -> partyService.leaveParty(sessionUser, 1L, request));
+
+            // then
+            verify(characterService).findAllById(any(Set.class));
+            verify(partyMapper).isAlreadyJoinedCharacter(eq(1L), any(Set.class));
+            verify(partyMemberRepository).deleteByPartyIdAndCharacterIdIn(eq(1L), any(Set.class));
+        }
+
+        @Test
+        @DisplayName("공유방 탈퇴 - 방장이 전체 캐릭터 탈퇴 시도")
+        void leaveParty_PartyLeaderAllCharactersLeave() {
+            // given
+            User user = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            Party party = Party.builder()
+                    .user(user)
+                    .name("테스트파티")
+                    .capacity(4)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+
+            List<Characters> characters = new ArrayList<>();
+            Characters character1 = Characters.builder()
+                    .user(user)
+                    .characterName("테스트캐릭터1")
+                    .build();
+            Characters character2 = Characters.builder()
+                    .user(user)
+                    .characterName("테스트캐릭터2")
+                    .build();
+            ReflectionTestUtils.setField(character1, "id", 1L);
+            ReflectionTestUtils.setField(character2, "id", 2L);
+            characters.add(character1);
+            characters.add(character2);
+
+            List<Long> characterIds = List.of(1L, 2L);
+            PartyMemberRequest request = new PartyMemberRequest(characterIds);
+
+            when(userService.getCurrentUser(sessionUser)).thenReturn(user);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
+            when(partyMapper.isAlreadyJoinedUser(1L, 1L)).thenReturn(true);
+            when(partyMapper.isAlreadyJoinedCharacter(1L, request.getCharacters())).thenReturn(true);
+            when(partyMapper.getPartyLeaderCharactersSize(1L)).thenReturn(2); // 전체 캐릭터 수와 탈퇴 요청 캐릭터 수가 동일
+
+            // when & then
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> partyService.leaveParty(sessionUser, 1L, request)
+            );
+            assertEquals("방장은 최소 한 캐릭터는 소유해야 합니다.\n공유방을 떠나려면 다른 사용자에게 방장을 위임해주세요.", exception.getMessage());
+
+            verify(partyMemberRepository, never()).deleteByPartyIdAndCharacterIdIn(anyLong(), anySet());
+        }
+
+        @Test
+        @DisplayName("공유방 탈퇴 - 참여하지 않은 유저")
+        void leaveParty_NotJoinedUser() {
+            // given
+            User user = User.builder()
+                    .email("test@test.com")
+                    .nickname("tester")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            Party party = Party.builder()
+                    .name("테스트파티")
+                    .capacity(4)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+
+            PartyMemberRequest request = new PartyMemberRequest(List.of(1L));
+
+            when(userService.getCurrentUser(sessionUser)).thenReturn(user);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(partyMapper.isAlreadyJoinedUser(1L, 1L)).thenReturn(false);
+
+            // when & then
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> partyService.leaveParty(sessionUser, 1L, request)
+            );
+            assertEquals("참여한 공유방이 아닙니다.", exception.getMessage());
         }
     }
 }

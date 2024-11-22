@@ -3,7 +3,7 @@ package gg.loto.party.web;
 import gg.loto.global.auth.LoginUser;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.service.PartyService;
-import gg.loto.party.web.dto.PartyJoinRequest;
+import gg.loto.party.web.dto.PartyMemberRequest;
 import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.party.web.dto.PartySaveRequest;
 import gg.loto.party.web.dto.PartyUpdateRequest;
@@ -33,8 +33,14 @@ public class PartyApiController {
         return ResponseEntity.ok(partyService.transferLeadership(user, partyId, userId));
     }
 
-    @PostMapping("/{partyId}/join")
-    public ResponseEntity<PartyResponse> joinParty(@LoginUser SessionUser user, @PathVariable(name="partyId") Long partyId, @Valid @RequestBody PartyJoinRequest dto){
+    @PostMapping("/{partyId}/members")
+    public ResponseEntity<PartyResponse> joinParty(@LoginUser SessionUser user, @PathVariable(name="partyId") Long partyId, @Valid @RequestBody PartyMemberRequest dto){
         return ResponseEntity.ok(partyService.joinParty(user, partyId, dto));
+    }
+
+    @DeleteMapping("/{partyId}/members")
+    public ResponseEntity leaveParty(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId, @Valid @RequestBody PartyMemberRequest dto){
+        partyService.leaveParty(user, partyId, dto);
+        return ResponseEntity.noContent().build();
     }
 }

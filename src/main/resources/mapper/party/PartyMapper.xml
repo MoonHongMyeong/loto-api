@@ -54,4 +54,14 @@
         </foreach>
         )
     </select>
+
+    <select id="getPartyLeaderCharactersSize" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM party_member pm
+        JOIN characters c ON pm.character_id = c.id
+        JOIN parties p ON pm.party_id = p.id
+        WHERE pm.party_id = #{partyId}
+        AND p.user_id = c.user_id
+    </select>
 </mapper>
