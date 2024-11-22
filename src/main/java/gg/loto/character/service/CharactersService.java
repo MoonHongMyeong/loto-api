@@ -88,4 +88,9 @@ public class CharactersService {
             throw new RuntimeException("본인이 등록한 캐릭터만 공유방에 참여, 탈퇴 할 수 있습니다.");
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<Characters> findAllByUser(Long targetUserId) {
+        return charactersRepository.findAllByUserId(targetUserId);
+    }
 }

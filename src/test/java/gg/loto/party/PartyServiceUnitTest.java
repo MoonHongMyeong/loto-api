@@ -928,4 +928,163 @@ class PartyServiceUnitTest {
             assertEquals("참여한 공유방이 아닙니다.", exception.getMessage());
         }
     }
+
+    @Nested
+    @DisplayName("공유방 강제 퇴장 테스트")
+    class KickMemberTest {
+        @Test
+        @DisplayName("방장이 일반 멤버를 강제 퇴장시키면 성공한다")
+        void kickMember_Success() {
+                // given
+                User leader = User.builder()
+                        .email("leader@test.com")
+                        .nickname("방장")
+                        .build();
+                ReflectionTestUtils.setField(leader, "id", 1L);
+                SessionUser sessionUser = new SessionUser(leader);
+
+                User member = User.builder()
+                        .email("member@test.com")
+                        .nickname("멤버")
+                        .build();
+                ReflectionTestUtils.setField(member, "id", 2L);
+
+                Party party = Party.builder()
+                        .name("테스트파티")
+                        .capacity(4)
+                        .user(leader)
+                        .partyType(PartyType.FRIENDLY)
+                        .build();
+                ReflectionTestUtils.setField(party, "id", 1L);
+
+                when(userService.getCurrentUser(sessionUser)).thenReturn(leader);
+                when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+                when(userService.findById(2L)).thenReturn(member);
+                when(partyMapper.isAlreadyJoinedUser(1L, 2L)).thenReturn(true);
+
+                // when
+                assertDoesNotThrow(() -> 
+                partyService.kickMember(sessionUser, 1L, 2L));
+
+                // then
+                verify(partyMemberRepository).deleteByPartyIdAndUserId(1L, 2L);
+        }
+
+        @Test
+        @DisplayName("방장이 아닌 사용자가 강제 퇴장을 시도하면 실패한다")
+        void kickMember_NotLeader_ThrowsException() {
+                // given
+                User leader = User.builder()
+                        .email("leader@test.com")
+                        .nickname("방장")
+                        .build();
+                ReflectionTestUtils.setField(leader, "id", 1L);
+
+                User member = User.builder()
+                        .email("member@test.com")
+                        .nickname("멤버")
+                        .build();
+                ReflectionTestUtils.setField(member, "id", 2L);
+                SessionUser sessionUser = new SessionUser(member);
+
+                Party party = Party.builder()
+                        .name("테스트파티")
+                        .capacity(4)
+                        .user(leader)
+                        .partyType(PartyType.FRIENDLY)
+                        .build();
+                ReflectionTestUtils.setField(party, "id", 1L);
+
+                when(userService.getCurrentUser(sessionUser)).thenReturn(member);
+                when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+
+                // when & then
+                assertThrows(RuntimeException.class, () ->
+                partyService.kickMember(sessionUser, 1L, 3L),
+                "권한이 없는 요청입니다.");
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 공유방에서 강제 퇴장을 시도하면 실패한다")
+        void kickMember_PartyNotFound_ThrowsException() {
+                // given
+                User leader = User.builder()
+                        .email("leader@test.com")
+                        .nickname("방장")
+                        .build();
+                ReflectionTestUtils.setField(leader, "id", 1L);
+                SessionUser sessionUser = new SessionUser(leader);
+
+                when(partyRepository.findById(1L)).thenReturn(Optional.empty());
+
+                // when & then
+                assertThrows(IllegalArgumentException.class, () ->
+                partyService.kickMember(sessionUser, 1L, 2L),
+                "잘못된 공유방입니다.");
+        }
+
+        @Test
+        @DisplayName("공유방에 속하지 않은 멤버를 강제 퇴장시키려 하면 실패한다")
+        void kickMember_MemberNotInParty_ThrowsException() {
+                // given
+                User leader = User.builder()
+                        .email("leader@test.com")
+                        .nickname("방장")
+                        .build();
+                ReflectionTestUtils.setField(leader, "id", 1L);
+                SessionUser sessionUser = new SessionUser(leader);
+
+                User nonMember = User.builder()
+                        .email("non-member@test.com")
+                        .nickname("비멤버")
+                        .build();
+                ReflectionTestUtils.setField(nonMember, "id", 2L);
+
+                Party party = Party.builder()
+                        .name("테스트파티")
+                        .capacity(4)
+                        .user(leader)
+                        .partyType(PartyType.FRIENDLY)
+                        .build();
+                ReflectionTestUtils.setField(party, "id", 1L);
+
+                when(userService.getCurrentUser(sessionUser)).thenReturn(leader);
+                when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+                when(userService.findById(2L)).thenReturn(nonMember);
+                when(partyMapper.isAlreadyJoinedUser(1L, 2L)).thenReturn(false);
+
+                // when & then
+                assertThrows(IllegalArgumentException.class, () ->
+                partyService.kickMember(sessionUser, 1L, 2L),
+                "해당 유저는 공유방에 속해있지 않습니다.");
+        }
+
+        @Test
+        @DisplayName("방장을 강제 퇴장시키려 하면 실패한다")
+        void kickMember_KickLeader_ThrowsException() {
+                // given
+                User leader = User.builder()
+                        .email("leader@test.com")
+                        .nickname("방장")
+                        .build();
+                ReflectionTestUtils.setField(leader, "id", 1L);
+                SessionUser sessionUser = new SessionUser(leader);
+
+                Party party = Party.builder()
+                        .name("테스트파티")
+                        .capacity(4)
+                        .user(leader)
+                        .partyType(PartyType.FRIENDLY)
+                        .build();
+                ReflectionTestUtils.setField(party, "id", 1L);
+
+                when(userService.getCurrentUser(sessionUser)).thenReturn(leader);
+                when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+
+                // when & then
+                assertThrows(IllegalArgumentException.class, () ->
+                partyService.kickMember(sessionUser, 1L, 1L),
+                "방장을 강제 퇴장시킬 수 없습니다.");
+        }
+    }
 }

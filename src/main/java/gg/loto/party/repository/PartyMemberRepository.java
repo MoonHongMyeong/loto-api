@@ -8,4 +8,6 @@ import java.util.Set;
 
 public interface PartyMemberRepository extends JpaRepository<PartyMember, PartyMemberId> {
     void deleteByPartyIdAndCharacterIdIn(Long partyId, Set<Long> characters);
+
+    void deleteByPartyIdAndUserId(Long id, Long userId);
 }

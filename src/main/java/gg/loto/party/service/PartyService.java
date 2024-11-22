@@ -167,4 +167,17 @@ public class PartyService {
             throw new IllegalArgumentException("방장은 최소 한 캐릭터는 소유해야 합니다.\n공유방을 떠나려면 다른 사용자에게 방장을 위임해주세요.");
         }
     }
+
+    @Transactional
+    public void kickMember(SessionUser sessionUser, Long partyId, Long userId) {
+        User user = userService.getCurrentUser(sessionUser);
+        Party party = findPartyById(partyId);
+        if (!isPartyLeader(user, party)) throw new RuntimeException("권한이 없는 요청입니다.");
+        if (Objects.equals(party.getUser().getId(), userId)) throw new IllegalArgumentException("방장을 강제 퇴장시킬 수 없습니다.");
+    
+        User targetUser = userService.findById(userId);
+        if (!isAlreadyJoinedUser(party, targetUser)) throw new IllegalArgumentException("해당 유저는 공유방에 속해있지 않습니다.");
+
+        partyMemberRepository.deleteByPartyIdAndUserId(party.getId(), userId);
+    }
 }
