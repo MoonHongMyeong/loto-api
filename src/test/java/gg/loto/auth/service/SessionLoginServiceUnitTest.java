@@ -3,7 +3,7 @@ package gg.loto.auth.service;
 import gg.loto.auth.web.dto.LoginRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserService;
+import gg.loto.user.service.UserFindDao;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class SessionLoginServiceUnitTest {
 
     @Mock
-    private UserService userService;
+    private UserFindDao userFindDao;
     
     @Mock
     private HttpSession session;
@@ -56,7 +56,7 @@ class SessionLoginServiceUnitTest {
                     .nickname("테스터")
                     .build();
                     
-            when(userService.findByEmail(email)).thenReturn(user);
+            when(userFindDao.findByEmail(email)).thenReturn(user);
             when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
             
             // when
@@ -75,7 +75,7 @@ class SessionLoginServiceUnitTest {
             LoginRequest loginRequest = new LoginRequest();
             ReflectionTestUtils.setField(loginRequest, "email", email);
             
-            when(userService.findByEmail(email))
+            when(userFindDao.findByEmail(email))
                 .thenThrow(new RuntimeException("존재하지 않는 사용자입니다."));
                 
             // when & then
@@ -101,7 +101,7 @@ class SessionLoginServiceUnitTest {
                     .password(encodedPassword)
                     .build();
                     
-            when(userService.findByEmail(email)).thenReturn(user);
+            when(userFindDao.findByEmail(email)).thenReturn(user);
             when(passwordEncoder.matches(wrongPassword, encodedPassword)).thenReturn(false);
             
             // when & then

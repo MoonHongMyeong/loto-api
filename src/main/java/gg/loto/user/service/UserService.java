@@ -1,17 +1,14 @@
 package gg.loto.user.service;
 
 import gg.loto.auth.service.LoginService;
-import gg.loto.global.auth.dto.SessionUser;
-import gg.loto.user.web.dto.UserUpdateRequest;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
-import gg.loto.user.web.dto.UserResponse;
-import gg.loto.user.web.dto.UserSaveRequest;
 import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
+import gg.loto.user.web.dto.UserResponse;
+import gg.loto.user.web.dto.UserSaveRequest;
+import gg.loto.user.web.dto.UserUpdateRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -70,12 +67,6 @@ public class UserService {
         return UserResponse.of(user);
     }
     
-    @Transactional(readOnly = true)
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
-    }
-
     @Transactional
     public void withdraw(Long id) {
         User user = userRepository.findById(id)
@@ -91,17 +82,5 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
         return UserResponse.of(user);
-    }
-
-    @Transactional(readOnly = true)
-    public User getCurrentUser(SessionUser sessionUser) {
-        return userRepository.findById(sessionUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
-    }
-
-    @Transactional(readOnly = true)
-    public User findById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
     }
 }

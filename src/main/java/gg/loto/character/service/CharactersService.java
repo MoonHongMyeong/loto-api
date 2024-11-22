@@ -8,12 +8,11 @@ import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserService;
+import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,11 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CharactersService {
     private final CharactersRepository charactersRepository;
-    private final UserService userService;
+    private final UserFindDao userFindDao;
 
     @Transactional
     public CharacterResponse createCharacter(SessionUser sessionUser, CharacterSaveRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         validateDuplicateCharacter(dto.getCharacterName(), user.getId());
 
         Characters character = dto.toEntity(user);

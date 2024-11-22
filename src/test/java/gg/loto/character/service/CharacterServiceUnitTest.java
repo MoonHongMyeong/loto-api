@@ -1,8 +1,5 @@
 package gg.loto.character.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import gg.loto.character.domain.Characters;
 import gg.loto.character.repository.CharactersRepository;
 import gg.loto.character.web.dto.CharacterListResponse;
@@ -11,7 +8,7 @@ import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserService;
+import gg.loto.user.service.UserFindDao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,7 +36,7 @@ public class CharacterServiceUnitTest {
     private CharactersRepository charactersRepository;
 
     @Mock
-    private UserService userService;
+    private UserFindDao userFindDao;
 
     @Nested
     @DisplayName("캐릭터 생성 테스트")
@@ -64,7 +64,7 @@ public class CharacterServiceUnitTest {
 
             Characters savedCharacter = request.toEntity(user);
 
-            given(userService.getCurrentUser(any(SessionUser.class))).willReturn(user);
+            given(userFindDao.getCurrentUser(any(SessionUser.class))).willReturn(user);
             given(charactersRepository.findByCharacterNameAndUserId(request.getCharacterName(), user.getId()))
                     .willReturn(Optional.empty());
             given(charactersRepository.save(any(Characters.class))).willReturn(savedCharacter);
@@ -97,7 +97,7 @@ public class CharacterServiceUnitTest {
                     .characterName("테스트캐릭터")
                     .build();
 
-            given(userService.getCurrentUser(any(SessionUser.class))).willReturn(user);
+            given(userFindDao.getCurrentUser(any(SessionUser.class))).willReturn(user);
             given(charactersRepository.findByCharacterNameAndUserId(request.getCharacterName(), user.getId()))
                     .willReturn(Optional.of(existingCharacter));
 
@@ -131,7 +131,7 @@ public class CharacterServiceUnitTest {
                     .itemMaxLevel("1550.0")
                     .build();
 
-            given(userService.getCurrentUser(sessionUser)).willReturn(user);
+            given(userFindDao.getCurrentUser(sessionUser)).willReturn(user);
             given(charactersRepository.findByIdAndUserId(characterId, user.getId()))
                     .willReturn(Optional.of(character));
 
@@ -157,7 +157,7 @@ public class CharacterServiceUnitTest {
                     .itemMaxLevel("1550.0")
                     .build();
 
-            given(userService.getCurrentUser(sessionUser)).willReturn(user);
+            given(userFindDao.getCurrentUser(sessionUser)).willReturn(user);
             given(charactersRepository.findByIdAndUserId(characterId, user.getId()))
                     .willReturn(Optional.empty());
 

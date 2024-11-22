@@ -12,7 +12,7 @@ import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.party.web.dto.PartySaveRequest;
 import gg.loto.party.web.dto.PartyUpdateRequest;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserService;
+import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +28,12 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyMemberRepository partyMemberRepository;
     private final PartyMapper partyMapper;
-    private final UserService userService;
+    private final UserFindDao userFindDao;
     private final CharactersService characterService;
 
     @Transactional
     public PartyResponse createParty(SessionUser sessionUser, PartySaveRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         validateDuplicationPartyNameAndUserId(dto.getName(), user.getId());
 
         Party savedParty = partyRepository.save(dto.toEntity(user));
@@ -50,7 +50,7 @@ public class PartyService {
 
     @Transactional
     public PartyResponse updateParty(SessionUser sessionUser, Long partyId, PartyUpdateRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         if (!isPartyLeader(user, party)) throw new RuntimeException("권한이 없는 요청입니다.");
 
@@ -61,11 +61,11 @@ public class PartyService {
 
     @Transactional
     public PartyResponse transferLeadership(SessionUser sessionUser, Long partyId, Long userId) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         if (!isPartyLeader(user, party)) throw new RuntimeException("권한이 없는 요청입니다.");
 
-        User newLeader = userService.findById(userId);
+        User newLeader = userFindDao.findById(userId);
         party.transferLeadership(newLeader);
 
         return PartyResponse.of(party);
@@ -84,7 +84,7 @@ public class PartyService {
 
     @Transactional
     public PartyResponse joinParty(SessionUser sessionUser, Long partyId, PartyMemberRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         
         if (!isAlreadyJoinedUser(party, user)) {
@@ -132,7 +132,7 @@ public class PartyService {
 
     @Transactional
     public void leaveParty(SessionUser sessionUser, Long partyId, PartyMemberRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         if (!isAlreadyJoinedUser(party, user)) {
             throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
@@ -170,12 +170,12 @@ public class PartyService {
 
     @Transactional
     public void kickMember(SessionUser sessionUser, Long partyId, Long userId) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         if (!isPartyLeader(user, party)) throw new RuntimeException("권한이 없는 요청입니다.");
         if (Objects.equals(party.getUser().getId(), userId)) throw new IllegalArgumentException("방장을 강제 퇴장시킬 수 없습니다.");
     
-        User targetUser = userService.findById(userId);
+        User targetUser = userFindDao.findById(userId);
         if (!isAlreadyJoinedUser(party, targetUser)) throw new IllegalArgumentException("해당 유저는 공유방에 속해있지 않습니다.");
 
         partyMemberRepository.deleteByPartyIdAndUserId(party.getId(), userId);
@@ -183,7 +183,7 @@ public class PartyService {
 
     @Transactional
     public void removeParty(SessionUser sessionUser, Long partyId) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         if (!isPartyLeader(user, party)) throw new RuntimeException("권한이 없는 요청입니다.");
 
