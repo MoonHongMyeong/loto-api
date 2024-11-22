@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,5 +72,19 @@ public class CharactersService {
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("캐릭터가 없습니다."));
         return CharacterResponse.of(character);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Characters> findAllById(List<Long> charactersId) {
+        return charactersRepository.findAllById(charactersId);
+    }
+
+    public void validateCharacterOwnership(List<Characters> characters, User user) {
+        boolean hasInvalidCharacterOwnership = characters.stream()
+                .anyMatch(character -> !character.getUser().equals(user));
+        
+        if (hasInvalidCharacterOwnership){
+            throw new RuntimeException("본인이 등록한 캐릭터만 공유방에 참여할 수 있습니다.");
+        }
     }
 }

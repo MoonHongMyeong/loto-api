@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gg.loto.party.mapper.PartyMapper">
+    <select id="getJoinedMemberSize" resultType="int">
+        SELECT COUNT(c.user_id)
+        FROM party_member pm
+        JOIN characters c ON pm.character_id = c.id
+        WHERE pm.party_id = #{partyId}
+        GROUP BY c.user_id
+    </select>
+
+    <select id="getPartyMembers" resultType="gg.loto.party.web.dto.PartyMemberResponse">
+        SELECT 
+            p.id as party_id,
+            p.name as party_name,
+            p.party_type,
+            c.id as character_id,
+            c.character_name,
+            c.server_name,
+            c.character_class_name,
+            c.item_max_level,
+            c.item_avg_level,
+            c.character_level,
+            c.character_image,
+            u.id as user_id,
+            u.nickname as user_nickname
+        FROM party_member pm
+        JOIN parties p ON pm.party_id = p.id
+        JOIN characters c ON pm.character_id = c.id
+        JOIN users u ON c.user_id = u.id
+        WHERE pm.party_id = #{partyId}
+        ORDER BY c.item_max_level DESC
+    </select>
+
+    <select id="isAlreadyJoinedUser" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1 
+            FROM party_member pm 
+            JOIN characters c ON pm.character_id = c.id
+            WHERE pm.party_id = #{partyId} 
+            AND c.user_id = #{userId})
+    </select>
+
+    <select id="isAlreadyJoinedCharacter" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM party_member
+        WHERE party_id = #{partyId}
+        AND character_id IN
+        <foreach item="characterId" collection="characterIds" open="(" separator="," close=")">
+            #{characterId}
+        </foreach>
+        )
+    </select>
+</mapper>

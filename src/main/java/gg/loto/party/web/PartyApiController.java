@@ -3,6 +3,7 @@ package gg.loto.party.web;
 import gg.loto.global.auth.LoginUser;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.service.PartyService;
+import gg.loto.party.web.dto.PartyJoinRequest;
 import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.party.web.dto.PartySaveRequest;
 import gg.loto.party.web.dto.PartyUpdateRequest;
@@ -30,5 +31,10 @@ public class PartyApiController {
     @PutMapping("/{partyId}/leader/{userId}")
     public ResponseEntity<PartyResponse> transferLeadership(@LoginUser SessionUser user, @PathVariable(name="partyId") Long partyId, @PathVariable(name="userId") Long userId){
         return ResponseEntity.ok(partyService.transferLeadership(user, partyId, userId));
+    }
+
+    @PostMapping("/{partyId}/join")
+    public ResponseEntity<PartyResponse> joinParty(@LoginUser SessionUser user, @PathVariable(name="partyId") Long partyId, @Valid @RequestBody PartyJoinRequest dto){
+        return ResponseEntity.ok(partyService.joinParty(user, partyId, dto));
     }
 }
