@@ -180,4 +180,18 @@ public class PartyService {
 
         partyMemberRepository.deleteByPartyIdAndUserId(party.getId(), userId);
     }
+
+    @Transactional
+    public void removeParty(SessionUser sessionUser, Long partyId) {
+        User user = userService.getCurrentUser(sessionUser);
+        Party party = findPartyById(partyId);
+        if (!isPartyLeader(user, party)) throw new RuntimeException("권한이 없는 요청입니다.");
+
+        int joinedMemberSize = partyMapper.getJoinedMemberSize(partyId);
+        if (joinedMemberSize > 1) {
+            throw new RuntimeException("공유방에 다른 사용자가 있으면 삭제가 불가능합니다.");
+        }
+
+        partyRepository.delete(party);
+    }
 }

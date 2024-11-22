@@ -49,4 +49,10 @@ public class PartyApiController {
         partyService.kickMember(user, partyId, userId);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{partyId}")
+    public ResponseEntity removeParty(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId){
+        partyService.removeParty(user, partyId);
+        return ResponseEntity.noContent().build();
+    }
 }
