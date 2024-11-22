@@ -3,22 +3,27 @@ package gg.loto.global.config;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.sql.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.sql.*;
-
-@SpringBootTest
+@JdbcTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional(propagation = Propagation.NEVER)
 public class DatabaseConnectionTest {
 
     @Nested
-    @ActiveProfiles("h2")
+    @ActiveProfiles({"h2", "local"})
     class H2DatabaseConnectionTest {
 
         @Autowired
@@ -66,7 +71,8 @@ public class DatabaseConnectionTest {
     }
 
     @Nested
-    @ActiveProfiles("mysql")
+    @ActiveProfiles({"mysql", "local"})
+    @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
     class MySQLDatabaseConnectionTest {
 
         @Autowired
