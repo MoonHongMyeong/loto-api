@@ -116,7 +116,7 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     private boolean isNotPartyMember(Party party, User user) {
-        return !partyMapper.isPartyMember(party.getId(), user.getId());
+        return !partyMemberRepository.existsByPartyAndCharacter_User(party, user);
     }
 
     @Transactional(readOnly = true)
@@ -199,7 +199,7 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public PartyDetailResponse getPartyWithMembers(SessionUser sessionUser, Long partyId) {
+    public PartyResponse getParty(SessionUser sessionUser, Long partyId) {
         User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
 
@@ -207,8 +207,31 @@ public class PartyService {
             throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
         }
 
-        List<MemberCharacters> joinedMembersCharacters = partyMapper.findMemberCharacters(party.getId());
+        return PartyResponse.of(party);
+    }
 
-        return PartyDetailResponse.of(party, joinedMembersCharacters);
+    @Transactional(readOnly = true)
+    public PartyMemberCharactersResponse getPartyMemberCharacters(SessionUser sessionUser, Long partyId, Long lastCharacterId, boolean isMobile) {
+        User user = userFindDao.getCurrentUser(sessionUser);
+        Party party = findPartyById(partyId);
+
+        if (isNotPartyMember(party, user)) {
+            throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
+        }
+
+        int pageContentSize = isMobile ? 10: 30;
+        int fetchSize = pageContentSize + 1; // 다음 페이지 확인을 위해 실제로 조회할 데이터 수
+
+        List<MemberCharacters> fetchedCharacters = partyMapper.findMemberCharactersPaging(
+                partyId,
+                lastCharacterId,
+                fetchSize
+        );
+
+        boolean hasNextPage = fetchedCharacters.size() > pageContentSize;
+        List<MemberCharacters> pageCharacters = hasNextPage ?
+                fetchedCharacters.subList(0, pageContentSize) : fetchedCharacters;
+
+        return PartyMemberCharactersResponse.of(party, pageCharacters, hasNextPage);
     }
 }

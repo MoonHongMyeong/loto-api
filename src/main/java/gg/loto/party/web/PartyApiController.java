@@ -61,8 +61,12 @@ public class PartyApiController {
     }
 
     @GetMapping("/{partyId}")
-    public ResponseEntity<PartyDetailResponse> getPartyWithMembers(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId){
-        return ResponseEntity.ok(partyService.getPartyWithMembers(user, partyId));
+    public ResponseEntity<PartyResponse> getParty(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId){
+        return ResponseEntity.ok(partyService.getParty(user, partyId));
     }
-    
+
+    @GetMapping("/{partyId}/characters")
+    public ResponseEntity<PartyMemberCharactersResponse> getPartyMemberCharacters(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId, @RequestParam(name = "lastCharacterId", required = false) Long lastCharacterId, @RequestParam(name = "isMobile", defaultValue = "true") boolean isMobile){
+        return ResponseEntity.ok(partyService.getPartyMemberCharacters(user, partyId, lastCharacterId, isMobile));
+    }
 }

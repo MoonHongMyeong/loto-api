@@ -5,9 +5,7 @@ import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.domain.PartyType;
 import gg.loto.party.service.PartyService;
-import gg.loto.party.web.dto.PartyListResponse;
-import gg.loto.party.web.dto.PartyMemberRequest;
-import gg.loto.party.web.dto.PartySaveRequest;
+import gg.loto.party.web.dto.*;
 import gg.loto.user.service.UserFindDao;
 import gg.loto.user.service.UserService;
 import gg.loto.user.web.dto.UserResponse;
@@ -25,6 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles({"h2", "local"})
@@ -99,25 +98,103 @@ public class PartyIntegrationTest {
     }
 
     @Test
-    @DisplayName("파티에 참여하지 않은 유저는 상세 조회 시 예외가 발생한다")
-    void getPartyWithMembers_throwException_whenNotJoinedUser() {
+    @DisplayName("공유방 단일 조회 성공")
+    void getParty_Success() {
         // given
-        SessionUser partyLeader = createUser("leader@test.com", "방장");
-        SessionUser otherUser = createUser("other@test.com", "비참여자");
+        SessionUser user = createUser("test@test.com", "테스터");
+        Long characterId = createCharacter(user, "테스터", "버서커", "1620.83");
+        Long partyId = createParty(user, "테스트 공유방");
+        joinParty(user, partyId, characterId);
 
-        Long leaderCharacterId = createCharacter(partyLeader, "방장캐릭터", "디스트로이어", "1670.0");
-        Long partyId = createParty(partyLeader, "레이드팟");
-        joinParty(partyLeader, partyId, leaderCharacterId);
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        PartyResponse response = partyService.getParty(user, partyId);
+
+        // then
+        assertAll(
+                () -> assertEquals(partyId, response.getId()),
+                () -> assertEquals("테스트 공유방", response.getName()),
+                () -> assertEquals("테스터", response.getNickname()),
+                () -> assertEquals(8, response.getCapacity()),
+                () -> assertEquals(PartyType.FRIENDLY.getTypeKor(), response.getPartyType())
+        );
+    }
+
+    @Test
+    @DisplayName("참여하지 않은 공유방 조회시 예외 발생")
+    void getParty_NotMember_ThrowsException() {
+        // given
+        SessionUser user1 = createUser("user1@test.com", "유저1");
+        SessionUser user2 = createUser("user2@test.com", "유저2");
+
+        Long characterId = createCharacter(user1, "유저1", "버서커", "1620.83");
+        Long partyId = createParty(user1, "테스트 공유방");
+        joinParty(user1, partyId, characterId);
 
         entityManager.flush();
         entityManager.clear();
 
         // when & then
-        assertThatThrownBy(() ->
-                partyService.getPartyWithMembers(otherUser, partyId)
-        )
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("참여한 공유방이 아닙니다.");
+        assertThrows(IllegalArgumentException.class,
+                () -> partyService.getParty(user2, partyId),
+                "참여한 공유방이 아닙니다."
+        );
+    }
+
+    @Test
+    @DisplayName("공유방 멤버 캐릭터 조회 - 모바일")
+    void getPartyMemberCharacters_Mobile() {
+        // given
+        SessionUser user = createUser("test@test.com", "테스터");
+        Long partyId = createParty(user, "테스트 공유방");
+
+        // 12개의 캐릭터 생성 및 참여
+        for (int i = 0; i < 12; i++) {
+            Long characterId = createCharacter(user, "테스터" + i, "버서커", "1620.83");
+            joinParty(user, partyId, characterId);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        PartyMemberCharactersResponse response = partyService.getPartyMemberCharacters(user, partyId, null, true);
+
+        // then
+        assertAll(
+                () -> assertEquals(partyId, response.getId()),
+                () -> assertEquals(10, response.getMemberCharacters().size()), // 모바일은 10개만 표시
+                () -> assertTrue(response.isHasNext()) // 더 있음을 표시
+        );
+    }
+
+    @Test
+    @DisplayName("공유방 멤버 캐릭터 조회 - 웹")
+    void getPartyMemberCharacters_Web() {
+        // given
+        SessionUser user = createUser("test@test.com", "테스터");
+        Long partyId = createParty(user, "테스트 공유방");
+
+        // 32개의 캐릭터 생성 및 참여
+        for (int i = 0; i < 32; i++) {
+            Long characterId = createCharacter(user, "테스터" + i, "버서커", "1620.83");
+            joinParty(user, partyId, characterId);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        PartyMemberCharactersResponse response = partyService.getPartyMemberCharacters(user, partyId, null, false);
+
+        // then
+        assertAll(
+                () -> assertEquals(partyId, response.getId()),
+                () -> assertEquals(30, response.getMemberCharacters().size()), // 웹은 30개 표시
+                () -> assertTrue(response.isHasNext())
+        );
     }
 
     private SessionUser createUser(String email, String nickname) {

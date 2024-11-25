@@ -4,6 +4,7 @@ import gg.loto.character.domain.Characters;
 import gg.loto.party.web.dto.MemberCharacters;
 import gg.loto.party.web.dto.PartyListResponse;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,5 +23,5 @@ public interface PartyMapper {
 
     List<PartyListResponse> findMyParties(Long userId);
 
-    List<MemberCharacters> findMemberCharacters(Long partyId);
+    List<MemberCharacters> findMemberCharactersPaging(Long partyId, Long lastCharacterId, int pageSize);
 }

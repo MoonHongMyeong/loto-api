@@ -73,19 +73,53 @@
         </constructor>
     </resultMap>
 
-    <select id="findMemberCharacters" resultMap="memberCharacterResultMap">
-        SELECT
-            c.id,
-            c.server_name AS serverName,
-            c.character_name AS characterName,
-            c.character_class_name AS characterClassName,
-            c.item_max_level AS itemMaxLevel,
-            u.nickname,
-            u.discord_username AS discordUsername
-        FROM party_member pm
-        JOIN characters c ON pm.character_id = c.id
-        JOIN users u ON c.user_id = u.id
-        WHERE pm.party_id = #{partyId}
-        ORDER BY c.user_id ASC, c.item_max_level DESC
+    <select id="findMemberCharactersPaging" resultMap="memberCharacterResultMap">
+       <if test="lastCharacterId != null">
+           <![CDATA[
+                WITH last_character AS (
+                    SELECT
+                        user_id as last_user_id,
+                        item_max_level as last_item_level,
+                        id as last_id
+                    FROM characters
+                    WHERE id = #{lastCharacterId}
+                )
+           ]]>
+       </if>
+        <![CDATA[
+            SELECT
+                c.id,
+                c.server_name,
+                c.character_name,
+                c.character_class_name,
+                c.item_max_level,
+                u.nickname,
+                u.discord_username
+            FROM party_member pm
+            JOIN characters c ON pm.character_id = c.id
+            JOIN users u ON c.user_id = u.id
+            WHERE pm.party_id = #{partyId}
+        ]]>
+        <if test="lastCharacterId != null">
+            <![CDATA[
+                AND (
+                    c.user_id > (SELECT user_id FROM last_character)
+                    OR (
+                        c.user_id = (SELECT user_id FROM last_character)
+                        AND (
+                            c.item_max_level < (SELECT item_max_level FROM last_character)
+                            OR (
+                                c.item_max_level = (SELECT item_max_level FROM last_character)
+                                AND c.id > (SELECT id FROM last_character)
+                            )
+                        )
+                    )
+                )
+            ]]>
+        </if>
+        <![CDATA[
+            ORDER BY c.user_id ASC, c.item_max_level DESC, c.id ASC
+            LIMIT #{pageSize}
+        ]]>
     </select>
 </mapper>
