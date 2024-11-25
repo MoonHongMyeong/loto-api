@@ -13,13 +13,13 @@
         FROM DUAL
     </select>
 
-    <select id="isAlreadyJoinedUser" resultType="boolean">
-        SELECT EXISTS(
-            SELECT 1 
-            FROM party_member pm 
-            JOIN characters c ON pm.character_id = c.id
-            WHERE pm.party_id = #{partyId} 
-            AND c.user_id = #{userId})
+    <select id="isPartyMember" resultType="boolean">
+        SELECT
+            COUNT(*) > 0
+        FROM party_member pm
+        JOIN characters c ON pm.character_id = c.id
+        WHERE pm.party_id = #{partyId}
+        AND c.user_id = #{userId}
     </select>
 
     <select id="isAlreadyJoinedCharacter" resultType="boolean">
@@ -59,5 +59,33 @@
         WHERE c.user_id = #{userId}
         GROUP BY p.id, p.name, u.nickname, p.capacity, p.party_type
         ORDER BY p.id
+    </select>
+
+    <resultMap id="memberCharacterResultMap" type="gg.loto.party.web.dto.MemberCharacters">
+        <constructor>
+            <arg column="id" javaType="Long"/>
+            <arg column="server_name" javaType="String"/>
+            <arg column="character_name" javaType="String"/>
+            <arg column="character_class_name" javaType="String"/>
+            <arg column="item_max_level" javaType="String"/>
+            <arg column="nickname" javaType="String"/>
+            <arg column="discord_username" javaType="String"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findMemberCharacters" resultMap="memberCharacterResultMap">
+        SELECT
+            c.id,
+            c.server_name AS serverName,
+            c.character_name AS characterName,
+            c.character_class_name AS characterClassName,
+            c.item_max_level AS itemMaxLevel,
+            u.nickname,
+            u.discord_username AS discordUsername
+        FROM party_member pm
+        JOIN characters c ON pm.character_id = c.id
+        JOIN users u ON c.user_id = u.id
+        WHERE pm.party_id = #{partyId}
+        ORDER BY c.user_id ASC, c.item_max_level DESC
     </select>
 </mapper>

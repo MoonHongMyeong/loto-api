@@ -84,7 +84,7 @@ public class PartyService {
         User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
         
-        if (!isAlreadyJoinedUser(party, user)) {
+        if (isNotPartyMember(party, user)) {
             validatePartyCapacity(party);
         }
     
@@ -115,8 +115,8 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    private boolean isAlreadyJoinedUser(Party party, User user) {
-        return partyMapper.isAlreadyJoinedUser(party.getId(), user.getId());
+    private boolean isNotPartyMember(Party party, User user) {
+        return !partyMapper.isPartyMember(party.getId(), user.getId());
     }
 
     @Transactional(readOnly = true)
@@ -132,7 +132,7 @@ public class PartyService {
     public void leaveParty(SessionUser sessionUser, Long partyId, PartyMemberRequest dto) {
         User user = userFindDao.getCurrentUser(sessionUser);
         Party party = findPartyById(partyId);
-        if (!isAlreadyJoinedUser(party, user)) {
+        if (isNotPartyMember(party, user)) {
             throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
         }
 
@@ -174,7 +174,7 @@ public class PartyService {
         if (Objects.equals(party.getUser().getId(), userId)) throw new IllegalArgumentException("방장을 강제 퇴장시킬 수 없습니다.");
     
         User targetUser = userFindDao.findById(userId);
-        if (!isAlreadyJoinedUser(party, targetUser)) throw new IllegalArgumentException("해당 유저는 공유방에 속해있지 않습니다.");
+        if (isNotPartyMember(party, targetUser)) throw new IllegalArgumentException("해당 유저는 공유방에 속해있지 않습니다.");
 
         partyMemberRepository.deleteByPartyIdAndUserId(party.getId(), userId);
     }
@@ -196,5 +196,19 @@ public class PartyService {
     @Transactional(readOnly = true)
     public List<PartyListResponse> getMyParties(SessionUser user) {
         return partyMapper.findMyParties(user.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public PartyDetailResponse getPartyWithMembers(SessionUser sessionUser, Long partyId) {
+        User user = userFindDao.getCurrentUser(sessionUser);
+        Party party = findPartyById(partyId);
+
+        if (isNotPartyMember(party, user)) {
+            throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
+        }
+
+        List<MemberCharacters> joinedMembersCharacters = partyMapper.findMemberCharacters(party.getId());
+
+        return PartyDetailResponse.of(party, joinedMembersCharacters);
     }
 }

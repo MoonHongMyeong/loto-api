@@ -9,10 +9,7 @@ import gg.loto.party.mapper.PartyMapper;
 import gg.loto.party.repository.PartyMemberRepository;
 import gg.loto.party.repository.PartyRepository;
 import gg.loto.party.service.PartyService;
-import gg.loto.party.web.dto.PartyMemberRequest;
-import gg.loto.party.web.dto.PartyResponse;
-import gg.loto.party.web.dto.PartySaveRequest;
-import gg.loto.party.web.dto.PartyUpdateRequest;
+import gg.loto.party.web.dto.*;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserFindDao;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +25,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -412,7 +410,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
+            when(partyMapper.isPartyMember(party.getId(), user.getId())).thenReturn(false);
             when(partyMapper.getJoinedMemberSize(party.getId())).thenReturn(2);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
             when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(false);
@@ -423,7 +421,7 @@ class PartyServiceUnitTest {
             assertAll(
                     () -> assertEquals(party.getId(), response.getId()),
                     () -> assertEquals(party.getName(), response.getName()),
-                    () -> verify(partyMapper).isAlreadyJoinedUser(party.getId(), user.getId()),
+                    () -> verify(partyMapper).isPartyMember(party.getId(), user.getId()),
                     () -> verify(partyMapper).getJoinedMemberSize(party.getId()),
                     () -> verify(characterService).findAllById(request.getCharacters()),
                     () -> verify(partyMapper).isAlreadyJoinedCharacter(party.getId(), request.getCharacters())
@@ -471,7 +469,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(another);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), another.getId())).thenReturn(false);
+            when(partyMapper.isPartyMember(party.getId(), another.getId())).thenReturn(false);
             when(partyMapper.getJoinedMemberSize(party.getId())).thenReturn(2);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
             when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(false);
@@ -482,7 +480,7 @@ class PartyServiceUnitTest {
             assertAll(
                     () -> assertEquals(party.getId(), response.getId()),
                     () -> assertEquals(party.getName(), response.getName()),
-                    () -> verify(partyMapper).isAlreadyJoinedUser(party.getId(), another.getId()),
+                    () -> verify(partyMapper).isPartyMember(party.getId(), another.getId()),
                     () -> verify(partyMapper).getJoinedMemberSize(party.getId()),
                     () -> verify(characterService).findAllById(request.getCharacters()),
                     () -> verify(partyMapper).isAlreadyJoinedCharacter(party.getId(), request.getCharacters())
@@ -515,7 +513,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(true);
+            when(partyMapper.isPartyMember(party.getId(), user.getId())).thenReturn(true);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
             when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(false);
 
@@ -552,7 +550,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
+            when(partyMapper.isPartyMember(party.getId(), user.getId())).thenReturn(false);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
 
             // then
@@ -582,7 +580,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
+            when(partyMapper.isPartyMember(party.getId(), user.getId())).thenReturn(false);
             when(partyMapper.getJoinedMemberSize(party.getId())).thenReturn(4);
 
             // then
@@ -625,7 +623,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
+            when(partyMapper.isPartyMember(party.getId(), user.getId())).thenReturn(false);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
 
             // then
@@ -664,7 +662,7 @@ class PartyServiceUnitTest {
             // when
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(party.getId(), user.getId())).thenReturn(false);
+            when(partyMapper.isPartyMember(party.getId(), user.getId())).thenReturn(false);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
             when(partyMapper.isAlreadyJoinedCharacter(party.getId(), request.getCharacters())).thenReturn(true);
 
@@ -723,7 +721,7 @@ class PartyServiceUnitTest {
 
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(otherUser);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(1L, 2L)).thenReturn(true);
+            when(partyMapper.isPartyMember(1L, 2L)).thenReturn(true);
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
             when(partyMapper.isAlreadyJoinedCharacter(1L, request.getCharacters())).thenReturn(true);
 
@@ -773,7 +771,7 @@ class PartyServiceUnitTest {
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
-            when(partyMapper.isAlreadyJoinedUser(1L, 1L)).thenReturn(true);
+            when(partyMapper.isPartyMember(1L, 1L)).thenReturn(true);
             when(partyMapper.isAlreadyJoinedCharacter(1L, request.getCharacters())).thenReturn(true);
             when(partyMapper.getPartyLeaderCharactersSize(1L)).thenReturn(3); // 전체 3개 중 2개 탈퇴
 
@@ -830,7 +828,7 @@ class PartyServiceUnitTest {
 
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(other);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(1L, other.getId())).thenReturn(true);
+            when(partyMapper.isPartyMember(1L, other.getId())).thenReturn(true);
             when(characterService.findAllById(any(Set.class))).thenReturn(List.of(character1, character2));
             when(partyMapper.isAlreadyJoinedCharacter(eq(1L), any(Set.class))).thenReturn(true);
 
@@ -882,7 +880,7 @@ class PartyServiceUnitTest {
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
             when(characterService.findAllById(request.getCharacters())).thenReturn(characters);
-            when(partyMapper.isAlreadyJoinedUser(1L, 1L)).thenReturn(true);
+            when(partyMapper.isPartyMember(1L, 1L)).thenReturn(true);
             when(partyMapper.isAlreadyJoinedCharacter(1L, request.getCharacters())).thenReturn(true);
             when(partyMapper.getPartyLeaderCharactersSize(1L)).thenReturn(2); // 전체 캐릭터 수와 탈퇴 요청 캐릭터 수가 동일
 
@@ -918,7 +916,7 @@ class PartyServiceUnitTest {
 
             when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
             when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
-            when(partyMapper.isAlreadyJoinedUser(1L, 1L)).thenReturn(false);
+            when(partyMapper.isPartyMember(1L, 1L)).thenReturn(false);
 
             // when & then
             IllegalArgumentException exception = assertThrows(
@@ -960,7 +958,7 @@ class PartyServiceUnitTest {
                 when(userFindDao.getCurrentUser(sessionUser)).thenReturn(leader);
                 when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
                 when(userFindDao.findById(2L)).thenReturn(member);
-                when(partyMapper.isAlreadyJoinedUser(1L, 2L)).thenReturn(true);
+                when(partyMapper.isPartyMember(1L, 2L)).thenReturn(true);
 
                 // when
                 assertDoesNotThrow(() -> 
@@ -1051,7 +1049,7 @@ class PartyServiceUnitTest {
                 when(userFindDao.getCurrentUser(sessionUser)).thenReturn(leader);
                 when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
                 when(userFindDao.findById(2L)).thenReturn(nonMember);
-                when(partyMapper.isAlreadyJoinedUser(1L, 2L)).thenReturn(false);
+                when(partyMapper.isPartyMember(1L, 2L)).thenReturn(false);
 
                 // when & then
                 assertThrows(IllegalArgumentException.class, () ->
@@ -1210,4 +1208,88 @@ class PartyServiceUnitTest {
             verify(partyRepository, never()).delete(any(Party.class));
         }
     }
+
+    @Nested
+    @DisplayName("유저 공유방 조회 테스트")
+    class getPartyWithMembers{
+        @Test
+        @DisplayName("성공 - 유저 공유방 조회")
+        void getPartyWithMembers_Success(){
+            // given
+            User user = User.builder()
+                    .email("leader@test.com")
+                    .nickname("방장")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            Party party = Party.builder()
+                    .name("테스트파티")
+                    .capacity(4)
+                    .user(user)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+            List<MemberCharacters> memberCharacters = List.of(
+                    MemberCharacters.builder()
+                            .id(1L)
+                            .serverName("카단")
+                            .characterName("테스트캐릭터")
+                            .characterClassName("디스트로이어")
+                            .itemMaxLevel("1640")
+                            .nickname("방장닉네임")
+                            .discordUsername("디스코드별명")
+                            .build()
+            );
+
+            when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(partyMapper.isPartyMember(1L, 1L)).thenReturn(true);
+            when(partyMapper.findMemberCharacters(1L)).thenReturn(memberCharacters);
+
+            // when
+            PartyDetailResponse result = partyService.getPartyWithMembers(sessionUser, 1L);
+
+            // then
+            assertThat(result.getPartyName()).isEqualTo("테스트파티");
+            assertThat(result.getMemberCharacters())
+                    .hasSize(1)
+                    .extracting("characterName", "nickname", "characterClassName")
+                    .containsExactly(
+                            tuple("테스트캐릭터", "방장닉네임", "디스트로이어")
+                    );
+        }
+
+        @Test
+        @DisplayName("실패 - 참여하지 않은 공유방 조회")
+        void getPartyWithMembers_throwException_whenNotJoined(){
+            // given
+            User user = User.builder()
+                    .email("leader@test.com")
+                    .nickname("방장")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+            SessionUser sessionUser = new SessionUser(user);
+
+            Party party = Party.builder()
+                    .name("테스트파티")
+                    .capacity(4)
+                    .user(user)
+                    .partyType(PartyType.FRIENDLY)
+                    .build();
+            ReflectionTestUtils.setField(party, "id", 1L);
+
+            when(userFindDao.getCurrentUser(sessionUser)).thenReturn(user);
+            when(partyRepository.findById(1L)).thenReturn(Optional.of(party));
+            when(partyMapper.isPartyMember(1L, 1L)).thenReturn(false);
+
+            // when & then
+            assertThatThrownBy(() ->
+                    partyService.getPartyWithMembers(sessionUser, 1L)
+            )
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("참여한 공유방이 아닙니다.");
+        }
+    }
+
 }

@@ -14,16 +14,17 @@ import gg.loto.user.web.dto.UserResponse;
 import gg.loto.user.web.dto.UserSaveRequest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles({"h2", "local"})
@@ -44,13 +45,12 @@ public class PartyIntegrationTest {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Test
     @DisplayName("유저1의 공유방 목록 조회 1건 성공")
-    void getMyParties_user1() {
+    void getMyParties_user1_success() {
         // given
         SessionUser user1 = createUser("test1@test.com", "타이탈로스의하수인");
-        Long characterId = createCharacter(user1, "타이탈로스의하수인", "인파이터");
+        Long characterId = createCharacter(user1, "타이탈로스의하수인", "인파이터", "1640.8");
         Long partyId = createParty(user1, "테스트 공유방");
         joinParty(user1, partyId, characterId);
 
@@ -69,18 +69,18 @@ public class PartyIntegrationTest {
 
     @Test
     @DisplayName("유저2의 공유방 목록 조회 2건 성공")
-    void getMyParties_user2() {
+    void getMyParties_user2_success() {
         // given
         SessionUser user1 = createUser("test1@test.com", "타이탈로스의하수인");
         SessionUser user2 = createUser("test2@test.com", "라우리엘의하수인");
 
         // 유저1의 파티 생성
-        Long user1CharacterId = createCharacter(user1, "타이탈로스의하수인", "인파이터");
+        Long user1CharacterId = createCharacter(user1, "타이탈로스의하수인", "인파이터", "1640.8");
         Long user1PartyId = createParty(user1, "테스트 공유방");
         joinParty(user1, user1PartyId, user1CharacterId);
 
         // 유저2의 파티 생성 및 참여
-        Long user2CharacterId = createCharacter(user2, "라우리엘의하수인", "브레이커");
+        Long user2CharacterId = createCharacter(user2, "라우리엘의하수인", "브레이커", "1680");
         Long user2PartyId = createParty(user2, "테스트 공유방222");
         joinParty(user2, user2PartyId, user2CharacterId);
         joinParty(user2, user1PartyId, user2CharacterId);
@@ -98,6 +98,28 @@ public class PartyIntegrationTest {
                 .containsExactlyInAnyOrder("테스트 공유방", "테스트 공유방222");
     }
 
+    @Test
+    @DisplayName("파티에 참여하지 않은 유저는 상세 조회 시 예외가 발생한다")
+    void getPartyWithMembers_throwException_whenNotJoinedUser() {
+        // given
+        SessionUser partyLeader = createUser("leader@test.com", "방장");
+        SessionUser otherUser = createUser("other@test.com", "비참여자");
+
+        Long leaderCharacterId = createCharacter(partyLeader, "방장캐릭터", "디스트로이어", "1670.0");
+        Long partyId = createParty(partyLeader, "레이드팟");
+        joinParty(partyLeader, partyId, leaderCharacterId);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when & then
+        assertThatThrownBy(() ->
+                partyService.getPartyWithMembers(otherUser, partyId)
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("참여한 공유방이 아닙니다.");
+    }
+
     private SessionUser createUser(String email, String nickname) {
         UserResponse response = userService.signUp(UserSaveRequest.builder()
                 .email(email)
@@ -107,14 +129,14 @@ public class PartyIntegrationTest {
         return new SessionUser(userFindDao.findById(response.getId()));
     }
 
-    private Long createCharacter(SessionUser user, String characterName, String className) {
+    private Long createCharacter(SessionUser user, String characterName, String className, String itemLevel) {
         return characterService.createCharacter(user, CharacterSaveRequest.builder()
                 .serverName("카단")
                 .characterName(characterName)
                 .characterLevel(70)
                 .characterClassName(className)
-                .itemAvgLevel("1640.83")
-                .itemMaxLevel("1640.83")
+                .itemAvgLevel(itemLevel)
+                .itemMaxLevel(itemLevel)
                 .build()).getId();
     }
 

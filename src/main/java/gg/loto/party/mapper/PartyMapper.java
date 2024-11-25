@@ -1,5 +1,7 @@
 package gg.loto.party.mapper;
 
+import gg.loto.character.domain.Characters;
+import gg.loto.party.web.dto.MemberCharacters;
 import gg.loto.party.web.dto.PartyListResponse;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,11 +14,13 @@ public interface PartyMapper {
     
     int getJoinedMemberSize(Long partyId);
 
-    boolean isAlreadyJoinedUser(Long partyId, Long userId);
+    boolean isPartyMember(Long partyId, Long userId);
 
     boolean isAlreadyJoinedCharacter(Long partyId, Set<Long> characterIds);
 
     int getPartyLeaderCharactersSize(Long partyId);
 
     List<PartyListResponse> findMyParties(Long userId);
+
+    List<MemberCharacters> findMemberCharacters(Long partyId);
 }

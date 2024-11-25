@@ -59,5 +59,10 @@ public class PartyApiController {
     public ResponseEntity<List<PartyListResponse>> getMyParties(@LoginUser SessionUser user){
         return ResponseEntity.ok(partyService.getMyParties(user));
     }
+
+    @GetMapping("/{partyId}")
+    public ResponseEntity<PartyDetailResponse> getPartyWithMembers(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId){
+        return ResponseEntity.ok(partyService.getPartyWithMembers(user, partyId));
+    }
     
 }
