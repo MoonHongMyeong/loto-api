@@ -4,34 +4,13 @@
 
 <mapper namespace="gg.loto.party.mapper.PartyMapper">
     <select id="getJoinedMemberSize" resultType="int">
-        SELECT COUNT(c.user_id)
-        FROM party_member pm
-        JOIN characters c ON pm.character_id = c.id
-        WHERE pm.party_id = #{partyId}
-        GROUP BY c.user_id
-    </select>
-
-    <select id="getPartyMembers" resultType="gg.loto.party.web.dto.PartyMemberResponse">
-        SELECT 
-            p.id as party_id,
-            p.name as party_name,
-            p.party_type,
-            c.id as character_id,
-            c.character_name,
-            c.server_name,
-            c.character_class_name,
-            c.item_max_level,
-            c.item_avg_level,
-            c.character_level,
-            c.character_image,
-            u.id as user_id,
-            u.nickname as user_nickname
-        FROM party_member pm
-        JOIN parties p ON pm.party_id = p.id
-        JOIN characters c ON pm.character_id = c.id
-        JOIN users u ON c.user_id = u.id
-        WHERE pm.party_id = #{partyId}
-        ORDER BY c.item_max_level DESC
+        SELECT
+            (SELECT COUNT(DISTINCT c.user_id)
+            FROM party_member pm
+            JOIN characters c ON pm.character_id = c.id
+            WHERE pm.party_id = #{partyId}
+            ) AS member_count
+        FROM DUAL
     </select>
 
     <select id="isAlreadyJoinedUser" resultType="boolean">
@@ -45,13 +24,13 @@
 
     <select id="isAlreadyJoinedCharacter" resultType="boolean">
         SELECT EXISTS (
-        SELECT 1
-        FROM party_member
-        WHERE party_id = #{partyId}
-        AND character_id IN
-        <foreach item="characterId" collection="characterIds" open="(" separator="," close=")">
-            #{characterId}
-        </foreach>
+            SELECT 1
+            FROM party_member
+            WHERE party_id = #{partyId}
+            AND character_id IN
+            <foreach item="characterId" collection="characterIds" open="(" separator="," close=")">
+                #{characterId}
+            </foreach>
         )
     </select>
 
@@ -63,5 +42,22 @@
         JOIN parties p ON pm.party_id = p.id
         WHERE pm.party_id = #{partyId}
         AND p.user_id = c.user_id
+    </select>
+
+    <select id="findMyParties" resultType="gg.loto.party.web.dto.PartyListResponse">
+        SELECT DISTINCT
+            p.id AS partyId,
+            p.name AS partyName,
+            u.nickname AS leaderNickname,
+            p.capacity,
+            p.party_type AS partyType,
+            COUNT(DISTINCT c.user_id) AS currentJoinedMembers
+        FROM parties p
+        JOIN users u ON p.user_id = u.id
+        JOIN party_member pm ON p.id = pm.party_id
+        JOIN characters c ON pm.character_id = c.id
+        WHERE c.user_id = #{userId}
+        GROUP BY p.id, p.name, u.nickname, p.capacity, p.party_type
+        ORDER BY p.id
     </select>
 </mapper>

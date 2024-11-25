@@ -7,10 +7,7 @@ import gg.loto.party.domain.Party;
 import gg.loto.party.mapper.PartyMapper;
 import gg.loto.party.repository.PartyMemberRepository;
 import gg.loto.party.repository.PartyRepository;
-import gg.loto.party.web.dto.PartyMemberRequest;
-import gg.loto.party.web.dto.PartyResponse;
-import gg.loto.party.web.dto.PartySaveRequest;
-import gg.loto.party.web.dto.PartyUpdateRequest;
+import gg.loto.party.web.dto.*;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
@@ -125,6 +122,7 @@ public class PartyService {
     @Transactional(readOnly = true)
     private void validatePartyCapacity(Party party) {
         int currentJoinMemberSize = partyMapper.getJoinedMemberSize(party.getId());
+
         if(party.getCapacity() < currentJoinMemberSize + 1){
             throw new RuntimeException("공유방 인원 제한이 모두 차 입장할 수 없습니다.");
         }
@@ -193,5 +191,10 @@ public class PartyService {
         }
 
         partyRepository.delete(party);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartyListResponse> getMyParties(SessionUser user) {
+        return partyMapper.findMyParties(user.getId());
     }
 }

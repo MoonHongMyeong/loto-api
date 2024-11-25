@@ -3,14 +3,13 @@ package gg.loto.party.web;
 import gg.loto.global.auth.LoginUser;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.service.PartyService;
-import gg.loto.party.web.dto.PartyMemberRequest;
-import gg.loto.party.web.dto.PartyResponse;
-import gg.loto.party.web.dto.PartySaveRequest;
-import gg.loto.party.web.dto.PartyUpdateRequest;
+import gg.loto.party.web.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/party")
@@ -55,4 +54,10 @@ public class PartyApiController {
         partyService.removeParty(user, partyId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping
+    public ResponseEntity<List<PartyListResponse>> getMyParties(@LoginUser SessionUser user){
+        return ResponseEntity.ok(partyService.getMyParties(user));
+    }
+    
 }
