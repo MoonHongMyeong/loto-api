@@ -9,8 +9,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Entity
@@ -37,6 +39,19 @@ public class Party extends BaseEntity {
 
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyMember> members = new ArrayList<>();
+
+    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartyInviteCodes> inviteCodes = new ArrayList<>();
+
+    public PartyInviteCodes generateInviteCode() {
+        PartyInviteCodes inviteCode = PartyInviteCodes.builder()
+                .party(this)
+                .code(UUID.randomUUID())
+                .expiresAt(LocalDateTime.now().plusDays(1))
+                .build();
+        inviteCodes.add(inviteCode);
+        return inviteCode;
+    }
 
     public void addMember(Characters character){
         PartyMember member = PartyMember.builder()
