@@ -10,13 +10,15 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class WeeklyRaidResponse {
+    private Long id;
     private String raidType;
     private String difficulty;
     private int stage;
     private LocalDateTime updatedAt;
 
     @Builder
-    public WeeklyRaidResponse(String raidType, String difficulty, int stage, LocalDateTime updatedAt){
+    public WeeklyRaidResponse(Long id, String raidType, String difficulty, int stage, LocalDateTime updatedAt){
+        this.id = id;
         this.raidType = raidType;
         this.difficulty = difficulty;
         this.stage = stage;
@@ -25,6 +27,7 @@ public class WeeklyRaidResponse {
 
     public static WeeklyRaidResponse of(CharacterWeeklyRaid weeklyRaid){
         return WeeklyRaidResponse.builder()
+                .id(weeklyRaid.getId())
                 .raidType(weeklyRaid.getRaidType().name())
                 .difficulty(weeklyRaid.getDifficulty().name())
                 .stage(weeklyRaid.getStage())
