@@ -91,4 +91,13 @@ public class Characters extends BaseEntity {
         }
         this.weeklyRaids.add(weeklyRaid);
     }
+
+    public void removeWeeklyRaid(Long raidId) {
+        CharacterWeeklyRaid weeklyRaid = weeklyRaids.stream()
+                    .filter(raid -> raid.getId().equals(raidId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("삭제할 레이드가 존재하지 않습니다."));
+
+        this.weeklyRaids.remove(weeklyRaid);
+    }
 }

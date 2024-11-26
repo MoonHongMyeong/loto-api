@@ -61,4 +61,18 @@ public class RaidService {
 
         return CharacterListResponse.of(character);
     }
+
+    @Transactional
+    public CharacterListResponse removeWeeklyRaid(SessionUser sessionUser, Long characterId, Long raidId) {
+        User user = userFindDao.getCurrentUser(sessionUser);
+        Characters character = characterFindDao.findById(characterId);
+
+        if (!character.isOwnership(user)) {
+            throw new IllegalArgumentException("본인이 소유한 캐릭터만 가능한 요청입니다.");
+        }
+
+        character.removeWeeklyRaid(raidId);
+
+        return CharacterListResponse.of(character);
+    }
 }

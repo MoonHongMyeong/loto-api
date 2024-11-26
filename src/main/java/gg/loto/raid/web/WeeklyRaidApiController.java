@@ -26,4 +26,9 @@ public class WeeklyRaidApiController {
     public ResponseEntity<CharacterListResponse> updateWeeklyRaid(@LoginUser SessionUser user, @PathVariable(name = "characterId") Long characterId, @PathVariable(name = "raidId") Long raidId, @Valid @RequestBody RaidUpdateRequest dto) {
         return ResponseEntity.ok(raidService.updateWeeklyRaid(user, characterId, raidId, dto));
     }
+
+    @DeleteMapping("/{raidId}")
+    public ResponseEntity<CharacterListResponse> removeWeeklyRaid(@LoginUser SessionUser user, @PathVariable(name = "characterId") Long characterId, @PathVariable(name = "raidId") Long raidId){
+        return ResponseEntity.ok(raidService.removeWeeklyRaid(user, characterId, raidId));
+    }
 }
