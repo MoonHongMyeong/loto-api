@@ -74,4 +74,21 @@ public class Characters extends BaseEntity {
         this.itemMaxLevel = dto.getItemMaxLevel();
         this.itemAvgLevel = dto.getItemAvgLevel();
     }
+
+    public boolean isOwnership(User user){
+        return this.getUser().equals(user);
+    }
+
+    public void addWeeklyRaid(CharacterWeeklyRaid weeklyRaid) {
+        boolean isDuplicate = weeklyRaids.stream()
+                .anyMatch(existing ->
+                    existing.getRaidType() == weeklyRaid.getRaidType() &&
+                            existing.getDifficulty() == weeklyRaid.getDifficulty() &&
+                            existing.getStage() == weeklyRaid.getStage()
+                );
+        if (isDuplicate) {
+            throw new IllegalStateException("이미 체크된 레이드입니다.");
+        }
+        this.weeklyRaids.add(weeklyRaid);
+    }
 }

@@ -120,4 +120,22 @@ public enum RaidType {
     public boolean isValidStage(int stage){
         return stage > 0 && stage <= this.stageCount;
     }
+
+    public boolean canEnterWithDifficulty(Difficulty difficulty) {
+        return switch (this) {
+            case VALTAN, VYKAS -> difficulty == Difficulty.NORMAL ||
+                    difficulty == Difficulty.HARD ||
+                    difficulty == Difficulty.HELL;
+
+            case KOUKUSATON -> difficulty == Difficulty.NORMAL ||
+                    difficulty == Difficulty.HELL;
+
+            case ABRELSHUD, ILLIAKKAN, KAMEN,
+                    KAYANGEL, IVORYTOWER,
+                    ECHIDNA, KAZEROTH_STAGE1_EGIR, KAZEROTH_STAGE2_ABRELSHUD -> difficulty == Difficulty.NORMAL ||
+                    difficulty == Difficulty.HARD;
+
+            case BEHEMOTH -> difficulty == Difficulty.NORMAL;
+        };
+    }
 }
