@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -61,8 +63,12 @@ public class Party extends BaseEntity {
         this.members.add(member);
     }
 
-    public void removeMember(Characters character){
-        this.members.removeIf(member -> member.getCharacter().equals(character));
+    public void removeMembers(List<Characters> characters){
+        Set<Long> characterIds = characters.stream()
+                .map(Characters::getId)
+                .collect(Collectors.toSet());
+
+        this.members.removeIf(member -> characterIds.contains(member.getCharacter().getId()));
     }
 
     @Builder
@@ -81,5 +87,14 @@ public class Party extends BaseEntity {
 
     public void transferLeadership(User newLeader) {
         this.user = newLeader;
+    }
+
+    public boolean isPartyLeader(User user) {
+        return this.user.equals(user);
+    }
+
+    public boolean isPartyMember(User user) {
+        return this.members.stream()
+                .anyMatch(member -> member.getCharacter().getUser().equals(user));
     }
 }

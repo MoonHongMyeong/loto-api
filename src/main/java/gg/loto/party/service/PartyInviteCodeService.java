@@ -28,7 +28,7 @@ public class PartyInviteCodeService {
         User user = userFindDao.getCurrentUser(sessionUser);
         Party party = partyFindDao.findPartyById(dto.getPartyId());
 
-        if (!party.getUser().equals(user)){
+        if (!party.isPartyLeader(user)){
             throw new RuntimeException("초대 권한이 없습니다.");
         }
 
