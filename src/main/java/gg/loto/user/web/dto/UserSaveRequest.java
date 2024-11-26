@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import gg.loto.user.domain.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Getter
 @NoArgsConstructor
@@ -20,10 +21,10 @@ public class UserSaveRequest {
     @NotBlank(message = "닉네임은 필수 입력 값입니다.")
     private String nickname;
 
-    public User toEntity() {
+    public User toEntity(BCryptPasswordEncoder passwordEncoder) {
         return User.builder()
                 .email(email)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .nickname(nickname)
                 .build();
     }
@@ -33,9 +34,5 @@ public class UserSaveRequest {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-    }
-
-    public void setEncodedPassword(String encodedPassword) {
-        this.password = encodedPassword;
     }
 }

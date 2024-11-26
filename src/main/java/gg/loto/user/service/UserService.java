@@ -22,11 +22,9 @@ public class UserService {
     
     @Transactional
     public UserResponse signUp(UserSaveRequest userSaveRequest) {
-        
         validateDuplicateEmail(userSaveRequest.getEmail());
-        userSaveRequest.setEncodedPassword(passwordEncoder.encode(userSaveRequest.getPassword()));
         
-        User savedUser = userRepository.save(userSaveRequest.toEntity());
+        User savedUser = userRepository.save(userSaveRequest.toEntity(passwordEncoder));
         return UserResponse.of(savedUser);
     }
 
