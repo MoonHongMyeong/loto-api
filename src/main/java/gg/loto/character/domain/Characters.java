@@ -2,11 +2,15 @@ package gg.loto.character.domain;
 
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.entity.BaseEntity;
+import gg.loto.party.domain.PartyMember;
 import gg.loto.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -42,6 +46,9 @@ public class Characters extends BaseEntity {
     
     @Column(name = "character_image")
     private String characterImage;
+
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartyMember> members = new ArrayList<>();
 
     @Builder
     public Characters(User user, String characterName, String serverName, String characterClassName, String itemMaxLevel, String itemAvgLevel, int characterLevel, String characterImage) {

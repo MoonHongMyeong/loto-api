@@ -8,23 +8,24 @@ import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserService;
+import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CharactersService {
     private final CharactersRepository charactersRepository;
-    private final UserService userService;
+    private final UserFindDao userFindDao;
 
     @Transactional
     public CharacterResponse createCharacter(SessionUser sessionUser, CharacterSaveRequest dto) {
-        User user = userService.getCurrentUser(sessionUser);
+        User user = userFindDao.getCurrentUser(sessionUser);
         validateDuplicateCharacter(dto.getCharacterName(), user.getId());
 
         Characters character = dto.toEntity(user);
@@ -71,5 +72,24 @@ public class CharactersService {
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("캐릭터가 없습니다."));
         return CharacterResponse.of(character);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Characters> findAllById(Set<Long> charactersId) {
+        return charactersRepository.findAllById(charactersId);
+    }
+
+    public void validateCharacterOwnership(List<Characters> characters, User user) {
+        boolean hasInvalidCharacterOwnership = characters.stream()
+                .anyMatch(character -> !character.getUser().equals(user));
+        
+        if (hasInvalidCharacterOwnership){
+            throw new RuntimeException("본인이 등록한 캐릭터만 공유방에 참여, 탈퇴 할 수 있습니다.");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Characters> findAllByUser(Long targetUserId) {
+        return charactersRepository.findAllByUserId(targetUserId);
     }
 }

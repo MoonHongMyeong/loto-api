@@ -31,6 +31,7 @@ public class CharacterSaveRequest {
                 .serverName(serverName)
                 .characterName(characterName)
                 .characterLevel(characterLevel)
+                .characterClassName(characterClassName)
                 .itemAvgLevel(itemAvgLevel)
                 .itemMaxLevel(itemMaxLevel)
                 .characterImage(characterImage)

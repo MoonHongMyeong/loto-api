@@ -47,7 +47,7 @@ class UserServiceUnitTest {
                     .nickname("테스터")
                     .build();
                     
-            User user = request.toEntity();
+            User user = request.toEntity(passwordEncoder);
             when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
             when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
             when(userRepository.save(any(User.class))).thenReturn(user);

@@ -3,7 +3,7 @@ package gg.loto.auth.service;
 import gg.loto.auth.web.dto.LoginRequest;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserService;
+import gg.loto.user.service.UserFindDao;
 import gg.loto.user.web.dto.UserResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +19,13 @@ public class SessionLoginService implements LoginService{
     private static final int SESSION_EXPIRE_TIME = 60 * 60 * 24;
 
     private final HttpSession session;
-    private final UserService userService;
+    private final UserFindDao userFindDao;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
     public UserResponse login(LoginRequest loginRequest) {
-        User user = userService.findByEmail(loginRequest.getEmail());
+        User user = userFindDao.findByEmail(loginRequest.getEmail());
 
         verifyPassword(loginRequest.getPassword(), user.getPassword());
 

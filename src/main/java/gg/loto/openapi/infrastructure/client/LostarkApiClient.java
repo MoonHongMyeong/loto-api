@@ -3,6 +3,7 @@ package gg.loto.openapi.infrastructure.client;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,6 +17,7 @@ import gg.loto.openapi.dto.CharacterOpenApiResponse;
 import lombok.RequiredArgsConstructor;
 
 @Component
+@Profile("api")
 @RequiredArgsConstructor
 public class LostarkApiClient {
     @Value("${lostark.url}")
