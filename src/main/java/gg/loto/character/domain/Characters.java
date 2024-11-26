@@ -3,6 +3,7 @@ package gg.loto.character.domain;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.entity.BaseEntity;
 import gg.loto.party.domain.PartyMember;
+import gg.loto.raid.entity.CharacterWeeklyRaid;
 import gg.loto.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -49,6 +50,9 @@ public class Characters extends BaseEntity {
 
     @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyMember> members = new ArrayList<>();
+
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CharacterWeeklyRaid> weeklyRaids = new ArrayList<>();
 
     @Builder
     public Characters(User user, String characterName, String serverName, String characterClassName, String itemMaxLevel, String itemAvgLevel, int characterLevel, String characterImage) {
