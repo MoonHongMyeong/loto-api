@@ -3,6 +3,7 @@ package gg.loto.character.domain;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.entity.BaseEntity;
 import gg.loto.party.domain.PartyMember;
+import gg.loto.raid.entity.CharacterWeeklyRaid;
 import gg.loto.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -50,6 +51,9 @@ public class Characters extends BaseEntity {
     @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyMember> members = new ArrayList<>();
 
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CharacterWeeklyRaid> weeklyRaids = new ArrayList<>();
+
     @Builder
     public Characters(User user, String characterName, String serverName, String characterClassName, String itemMaxLevel, String itemAvgLevel, int characterLevel, String characterImage) {
         this.user = user;
@@ -69,5 +73,31 @@ public class Characters extends BaseEntity {
         this.characterLevel = dto.getCharacterLevel();
         this.itemMaxLevel = dto.getItemMaxLevel();
         this.itemAvgLevel = dto.getItemAvgLevel();
+    }
+
+    public boolean isOwnership(User user){
+        return this.getUser().equals(user);
+    }
+
+    public void addWeeklyRaid(CharacterWeeklyRaid weeklyRaid) {
+        boolean isDuplicate = weeklyRaids.stream()
+                .anyMatch(existing ->
+                    existing.getRaidType() == weeklyRaid.getRaidType() &&
+                            existing.getDifficulty() == weeklyRaid.getDifficulty() &&
+                            existing.getStage() == weeklyRaid.getStage()
+                );
+        if (isDuplicate) {
+            throw new IllegalStateException("이미 체크된 레이드입니다.");
+        }
+        this.weeklyRaids.add(weeklyRaid);
+    }
+
+    public void removeWeeklyRaid(Long raidId) {
+        CharacterWeeklyRaid weeklyRaid = weeklyRaids.stream()
+                    .filter(raid -> raid.getId().equals(raidId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("삭제할 레이드가 존재하지 않습니다."));
+
+        this.weeklyRaids.remove(weeklyRaid);
     }
 }
