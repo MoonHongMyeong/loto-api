@@ -8,6 +8,7 @@ import gg.loto.party.service.PartyFindDao;
 import gg.loto.party.vote.domain.PartyRaidVote;
 import gg.loto.party.vote.domain.VoteStatus;
 import gg.loto.party.vote.repository.PartyRaidVoteRepository;
+import gg.loto.party.vote.web.dto.VoteParticipantSaveRequest;
 import gg.loto.party.vote.web.dto.VoteResponse;
 import gg.loto.party.vote.web.dto.VoteSaveRequest;
 import gg.loto.party.vote.web.dto.VoteUpdateRequest;
@@ -41,7 +42,7 @@ public class PartyRaidVoteService {
         }
 
         PartyRaidVote savedVote = voteRepository.save(dto.toEntity(party, user));
-        savedVote.addParticipant(character);
+        savedVote.join(character);
 
         return VoteResponse.of(savedVote);
     }
@@ -78,6 +79,29 @@ public class PartyRaidVoteService {
 
         vote.cancel();
 
+        return VoteResponse.of(vote);
+    }
+
+    public VoteResponse joinVote(SessionUser sessionUser, Long voteId, VoteParticipantSaveRequest dto) {
+        User user = userFindDao.getCurrentUser(sessionUser);
+        PartyRaidVote vote = voteRepository.findById(voteId)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+
+        if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
+            throw new IllegalArgumentException("진행 중인 투표만 참여할 수 있습니다.");
+        }
+
+        Characters character = characterFindDao.findById(dto.getCharacterId());
+        if (!character.isOwnership(user)) {
+            throw new IllegalArgumentException("본인의 캐릭터만 참여할 수 있습니다.");
+        }
+
+        // 중복 참여 체크
+        if (vote.hasParticipant(character)) {
+            throw new IllegalArgumentException("이미 참여한 캐릭터입니다.");
+        }
+
+        vote.join(character);
         return VoteResponse.of(vote);
     }
 }

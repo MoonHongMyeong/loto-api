@@ -3,6 +3,7 @@ package gg.loto.party.vote.web;
 import gg.loto.global.auth.LoginUser;
 import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.vote.service.PartyRaidVoteService;
+import gg.loto.party.vote.web.dto.VoteParticipantSaveRequest;
 import gg.loto.party.vote.web.dto.VoteResponse;
 import gg.loto.party.vote.web.dto.VoteSaveRequest;
 import gg.loto.party.vote.web.dto.VoteUpdateRequest;
@@ -30,5 +31,10 @@ public class PartyRaidVoteApiController {
     @PatchMapping("/{voteId}/cancel")
     public ResponseEntity<VoteResponse> cancelVote(@LoginUser SessionUser user, @PathVariable(name = "voteId") Long voteId){
         return ResponseEntity.ok(voteService.cancelVote(user, voteId));
+    }
+
+    @PostMapping("/{voteId}/participant")
+    public ResponseEntity<VoteResponse> joinVote(@LoginUser SessionUser user, @PathVariable(name = "voteId") Long voteId, @Valid @RequestBody VoteParticipantSaveRequest dto){
+        return ResponseEntity.ok(voteService.joinVote(user, voteId, dto));
     }
 }

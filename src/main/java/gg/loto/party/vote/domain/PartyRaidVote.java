@@ -75,7 +75,7 @@ public class PartyRaidVote extends BaseEntity {
         this.voteStatus = voteStatus;
     }
 
-    public void addParticipant(Characters character){
+    public void join(Characters character){
         PartyRaidVoteParticipant participant = PartyRaidVoteParticipant.builder()
                 .vote(this)
                 .character(character)
@@ -102,5 +102,10 @@ public class PartyRaidVote extends BaseEntity {
 
     public void cancel() {
         this.voteStatus = VoteStatus.CANCEL;
+    }
+
+    public boolean hasParticipant(Characters character) {
+        return this.participants.stream()
+                .anyMatch(participant -> participant.getCharacter().equals(character));
     }
 }
