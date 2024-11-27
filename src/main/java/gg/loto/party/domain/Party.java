@@ -2,6 +2,7 @@ package gg.loto.party.domain;
 
 import gg.loto.character.domain.Characters;
 import gg.loto.global.entity.BaseEntity;
+import gg.loto.party.vote.domain.PartyRaidVote;
 import gg.loto.party.web.dto.PartyUpdateRequest;
 import gg.loto.user.domain.User;
 import jakarta.persistence.*;
@@ -44,6 +45,17 @@ public class Party extends BaseEntity {
 
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyInviteCodes> inviteCodes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartyRaidVote> raidVotes = new ArrayList<>();
+
+    public void addRaidVote(PartyRaidVote vote){
+        this.raidVotes.add(vote);
+    }
+
+    public void removeRaidVote(PartyRaidVote vote){
+        this.raidVotes.remove(vote);
+    }
 
     public PartyInviteCodes generateInviteCode() {
         PartyInviteCodes inviteCode = PartyInviteCodes.builder()
