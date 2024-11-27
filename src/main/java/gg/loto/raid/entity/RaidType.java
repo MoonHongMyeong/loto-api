@@ -31,21 +31,22 @@ public enum RaidType {
         return switch (this){
             case VALTAN -> switch(difficulty){
                 case NORMAL -> 1415;
-                case HARD -> 1445;
+                case HARD, HELL -> 1445;
                 default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
             };
             case VYKAS -> switch (difficulty){
                 case NORMAL -> 1430;
-                case HARD -> 1460;
+                case HARD, HELL -> 1460;
                 default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
             };
             case KOUKUSATON -> switch (difficulty){
-                case NORMAL -> 1475;
+                case NORMAL, HELL -> 1475;
                 default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
             };
             case ABRELSHUD -> switch (difficulty){
                 case NORMAL -> 1490;
                 case HARD -> 1540;
+                case HELL -> 1560;
                 default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
             };
             case ILLIAKKAN -> switch (difficulty){
@@ -123,14 +124,14 @@ public enum RaidType {
 
     public boolean canEnterWithDifficulty(Difficulty difficulty) {
         return switch (this) {
-            case VALTAN, VYKAS -> difficulty == Difficulty.NORMAL ||
+            case VALTAN, VYKAS, ABRELSHUD -> difficulty == Difficulty.NORMAL ||
                     difficulty == Difficulty.HARD ||
                     difficulty == Difficulty.HELL;
 
             case KOUKUSATON -> difficulty == Difficulty.NORMAL ||
                     difficulty == Difficulty.HELL;
 
-            case ABRELSHUD, ILLIAKKAN, KAMEN,
+            case ILLIAKKAN, KAMEN,
                     KAYANGEL, IVORYTOWER,
                     ECHIDNA, KAZEROTH_STAGE1_EGIR, KAZEROTH_STAGE2_ABRELSHUD -> difficulty == Difficulty.NORMAL ||
                     difficulty == Difficulty.HARD;
