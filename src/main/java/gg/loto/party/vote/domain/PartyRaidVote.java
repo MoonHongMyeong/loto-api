@@ -3,6 +3,7 @@ package gg.loto.party.vote.domain;
 import gg.loto.character.domain.Characters;
 import gg.loto.global.entity.BaseEntity;
 import gg.loto.party.domain.Party;
+import gg.loto.party.vote.web.dto.VoteUpdateRequest;
 import gg.loto.raid.entity.Difficulty;
 import gg.loto.raid.entity.RaidType;
 import gg.loto.user.domain.User;
@@ -84,5 +85,18 @@ public class PartyRaidVote extends BaseEntity {
 
     public void removeParticipant(Characters character){
         this.participants.removeIf(participant -> participant.getCharacter().equals(character));
+    }
+
+    public void update(VoteUpdateRequest dto) {
+        this.name = dto.getName();
+        this.raidType = RaidType.valueOf(dto.getRaidType());
+        this.difficulty = Difficulty.valueOf(dto.getDifficulty());
+        this.targetGateNumber = dto.getTargetGateNumber();
+        this.raidDatetime = dto.getRaidDatetime();
+        this.voteExpiresAt = dto.getVoteExpiresAt();
+    }
+
+    public boolean isCreator(User user) {
+        return this.creator.equals(user);
     }
 }
