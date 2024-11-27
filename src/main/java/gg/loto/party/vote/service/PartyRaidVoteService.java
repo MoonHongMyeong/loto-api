@@ -6,6 +6,7 @@ import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.domain.Party;
 import gg.loto.party.service.PartyFindDao;
 import gg.loto.party.vote.domain.PartyRaidVote;
+import gg.loto.party.vote.domain.PartyRaidVoteParticipant;
 import gg.loto.party.vote.domain.VoteStatus;
 import gg.loto.party.vote.repository.PartyRaidVoteRepository;
 import gg.loto.party.vote.web.dto.VoteParticipantSaveRequest;
@@ -42,7 +43,10 @@ public class PartyRaidVoteService {
         }
 
         PartyRaidVote savedVote = voteRepository.save(dto.toEntity(party, user));
-        savedVote.join(character);
+        savedVote.join(PartyRaidVoteParticipant.builder()
+                            .vote(savedVote)
+                            .character(character)
+                            .build());
 
         return VoteResponse.of(savedVote);
     }
@@ -97,11 +101,16 @@ public class PartyRaidVoteService {
             throw new IllegalArgumentException("본인의 캐릭터만 참여할 수 있습니다.");
         }
 
-        if (vote.hasParticipant(character)) {
+        PartyRaidVoteParticipant participant = PartyRaidVoteParticipant.builder()
+                .vote(vote)
+                .character(character)
+                .build();
+
+        if (vote.hasParticipant(participant)) {
             throw new IllegalArgumentException("이미 참여한 캐릭터입니다.");
         }
 
-        vote.join(character);
+        vote.join(participant);
         return VoteResponse.of(vote);
     }
 
@@ -120,11 +129,16 @@ public class PartyRaidVoteService {
             throw new IllegalArgumentException("본인의 캐릭터만 참여 취소할 수 있습니다.");
         }
 
-        if (!vote.hasParticipant(character)) {
+        PartyRaidVoteParticipant participant = PartyRaidVoteParticipant.builder()
+                .vote(vote)
+                .character(character)
+                .build();
+
+        if (!vote.hasParticipant(participant)) {
             throw new IllegalArgumentException("투표에 참여하지 않은 캐릭터입니다.");
         }
 
-        vote.leave(character);
+        vote.leave(participant);
 
         return VoteResponse.of(vote);
     }

@@ -1,6 +1,5 @@
 package gg.loto.party.vote.domain;
 
-import gg.loto.character.domain.Characters;
 import gg.loto.global.entity.BaseEntity;
 import gg.loto.party.domain.Party;
 import gg.loto.party.vote.web.dto.VoteUpdateRequest;
@@ -75,16 +74,20 @@ public class PartyRaidVote extends BaseEntity {
         this.voteStatus = voteStatus;
     }
 
-    public void join(Characters character){
-        PartyRaidVoteParticipant participant = PartyRaidVoteParticipant.builder()
-                .vote(this)
-                .character(character)
-                .build();
+    public void join(PartyRaidVoteParticipant participant){
+        if (this.participants.size() >= raidType.getRequiredPartySize()) {
+            throw new IllegalArgumentException("제한 인원이 초과되었습니다.");
+        }
+
         this.participants.add(participant);
+
+        if(this.participants.size() == raidType.getRequiredPartySize()){
+            this.voteStatus = VoteStatus.COMPLETE;
+        }
     }
 
-    public void leave(Characters character){
-        this.participants.removeIf(participant -> participant.getCharacter().equals(character));
+    public void leave(PartyRaidVoteParticipant participant){
+        this.participants.remove(participant);
     }
 
     public void update(VoteUpdateRequest dto) {
@@ -104,8 +107,7 @@ public class PartyRaidVote extends BaseEntity {
         this.voteStatus = VoteStatus.CANCEL;
     }
 
-    public boolean hasParticipant(Characters character) {
-        return this.participants.stream()
-                .anyMatch(participant -> participant.getCharacter().equals(character));
+    public boolean hasParticipant(PartyRaidVoteParticipant participant) {
+        return this.participants.contains(participant);
     }
 }
