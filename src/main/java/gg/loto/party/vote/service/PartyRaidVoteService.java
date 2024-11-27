@@ -110,6 +110,10 @@ public class PartyRaidVoteService {
             throw new IllegalArgumentException("이미 참여한 캐릭터입니다.");
         }
 
+        if (vote.isFullParty()) {
+            throw new IllegalArgumentException("제한 인원이 초과되었습니다.");
+        }
+
         vote.join(participant);
         return VoteResponse.of(vote);
     }
