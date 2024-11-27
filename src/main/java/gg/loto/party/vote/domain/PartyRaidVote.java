@@ -57,12 +57,9 @@ public class PartyRaidVote extends BaseEntity {
     private List<PartyRaidVoteParticipant> participants = new ArrayList<>();
 
     @Builder
-    public PartyRaidVote(Party party, User creator, Characters creatorCharacter,
-                         RaidType raidType, Difficulty difficulty,
-                         int targetGateNumber, LocalDateTime raidDatetime, LocalDateTime voteExpiresAt){
-
-        validatePartyMembership(party, creatorCharacter);
-        validateRaidRequirements(raidType, difficulty, targetGateNumber, creatorCharacter);
+    public PartyRaidVote(Party party, User creator,
+                         RaidType raidType, Difficulty difficulty, int targetGateNumber,
+                         LocalDateTime raidDatetime, LocalDateTime voteExpiresAt, VoteStatus voteStatus){
         this.party = party;
         this.creator = creator;
         this.raidType = raidType;
@@ -70,21 +67,7 @@ public class PartyRaidVote extends BaseEntity {
         this.targetGateNumber = targetGateNumber;
         this.raidDatetime = raidDatetime;
         this.voteExpiresAt = voteExpiresAt;
-
-        addParticipant(creatorCharacter);
-    }
-
-    private void validateRaidRequirements(RaidType raidType, Difficulty difficulty, int targetGateNumber, Characters character) {
-        int requiredLevel = raidType.getRequiredItemLevelForStage(difficulty, targetGateNumber);
-        if (Integer.parseInt(character.getItemMaxLevel()) < requiredLevel) {
-            throw new IllegalArgumentException(String.format("아이템 레벨이 부족합니다. 필요 레벨: %d"+ requiredLevel));
-        }
-    }
-
-    private void validatePartyMembership(Party party, Characters creatorCharacter) {
-        if (!party.isPartyMember(creatorCharacter.getUser())){
-            throw new IllegalArgumentException("파티 구성원만 투표를 생성할 수 있습니다.");
-        }
+        this.voteStatus = voteStatus;
     }
 
     public void addParticipant(Characters character){
