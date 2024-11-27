@@ -11,15 +11,11 @@ import gg.loto.party.vote.repository.PartyRaidVoteRepository;
 import gg.loto.party.vote.web.dto.VoteResponse;
 import gg.loto.party.vote.web.dto.VoteSaveRequest;
 import gg.loto.party.vote.web.dto.VoteUpdateRequest;
-import gg.loto.raid.entity.Difficulty;
-import gg.loto.raid.entity.RaidType;
 import gg.loto.user.domain.User;
 import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +47,7 @@ public class PartyRaidVoteService {
     }
 
     @Transactional
-    public VoteResponse updateVote(SessionUser sessionUser, Long partyId, Long voteId, VoteUpdateRequest dto) {
+    public VoteResponse updateVote(SessionUser sessionUser, Long voteId, VoteUpdateRequest dto) {
         dto.validate();
 
         User user = userFindDao.getCurrentUser(sessionUser);
@@ -64,6 +60,23 @@ public class PartyRaidVoteService {
         }
 
         vote.update(dto);
+
+        return VoteResponse.of(vote);
+    }
+
+    @Transactional
+    public VoteResponse cancelVote(SessionUser sessionUser, Long voteId) {
+        User user = userFindDao.getCurrentUser(sessionUser);
+        PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+
+        if ( !vote.isCreator(user) ) {
+            throw new IllegalArgumentException("투표 취소는 투표 생성자만 가능합니다.");
+        }
+        if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
+            throw new IllegalArgumentException("투표 상태가 진행중이 아닙니다.");
+        }
+
+        vote.cancel();
 
         return VoteResponse.of(vote);
     }

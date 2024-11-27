@@ -99,4 +99,8 @@ public class PartyRaidVote extends BaseEntity {
     public boolean isCreator(User user) {
         return this.creator.equals(user);
     }
+
+    public void cancel() {
+        this.voteStatus = VoteStatus.CANCEL;
+    }
 }

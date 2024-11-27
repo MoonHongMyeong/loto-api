@@ -23,7 +23,12 @@ public class PartyRaidVoteApiController {
     }
 
     @PutMapping("/{voteId}")
-    public ResponseEntity<VoteResponse> updateVote(@LoginUser SessionUser user, @PathVariable(name = "partyId") Long partyId, @PathVariable(name = "voteId") Long voteId, @Valid @RequestBody VoteUpdateRequest dto){
-        return ResponseEntity.ok(voteService.updateVote(user, partyId, voteId, dto));
+    public ResponseEntity<VoteResponse> updateVote(@LoginUser SessionUser user, @PathVariable(name = "voteId") Long voteId, @Valid @RequestBody VoteUpdateRequest dto){
+        return ResponseEntity.ok(voteService.updateVote(user, voteId, dto));
+    }
+
+    @PatchMapping("/{voteId}/cancel")
+    public ResponseEntity<VoteResponse> cancelVote(@LoginUser SessionUser user, @PathVariable(name = "voteId") Long voteId){
+        return ResponseEntity.ok(voteService.cancelVote(user, voteId));
     }
 }

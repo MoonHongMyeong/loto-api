@@ -56,7 +56,7 @@ public class VoteResponse {
                 .targetGateNumber(vote.getTargetGateNumber())
                 .raidDatetime(vote.getRaidDatetime())
                 .voteExpiresAt(vote.getVoteExpiresAt())
-                .voteStatus(vote.getVoteStatus().name())
+                .voteStatus(vote.getVoteStatus().getDescription())
                 .votedCharacters(vote.getParticipants().stream().map(VotedCharacterResponse::of).collect(Collectors.toList()))
                 .build();
     }
