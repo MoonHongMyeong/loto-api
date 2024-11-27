@@ -1,11 +1,12 @@
 package gg.loto.party.vote.web.dto;
 
+import gg.loto.global.entity.BaseEntity;
 import gg.loto.raid.entity.Difficulty;
 import gg.loto.raid.entity.RaidType;
 
 import java.time.LocalDateTime;
 
-public abstract class BaseVoteRequest {
+public abstract class BaseVoteRequest extends BaseEntity {
     protected void validateRaidRequest(String raidType, String difficulty,
                                        int targetGateNumber, LocalDateTime voteExpiresAt,
                                        LocalDateTime raidDatetime) {

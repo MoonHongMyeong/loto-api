@@ -74,14 +74,15 @@ public class PartyRaidVote extends BaseEntity {
         this.voteStatus = voteStatus;
     }
 
-    public void join(PartyRaidVoteParticipant participant){
+    public void join(PartyRaidVoteParticipant participant) {
         if (this.participants.size() >= raidType.getRequiredPartySize()) {
             throw new IllegalArgumentException("제한 인원이 초과되었습니다.");
         }
-
+        if (hasParticipant(participant)) {
+            throw new IllegalArgumentException("이미 참여한 캐릭터입니다.");
+        }
         this.participants.add(participant);
-
-        if(this.participants.size() == raidType.getRequiredPartySize()){
+        if (this.participants.size() == raidType.getRequiredPartySize()) {
             this.voteStatus = VoteStatus.COMPLETE;
         }
     }
@@ -108,6 +109,7 @@ public class PartyRaidVote extends BaseEntity {
     }
 
     public boolean hasParticipant(PartyRaidVoteParticipant participant) {
-        return this.participants.contains(participant);
+        return this.participants.stream()
+                .anyMatch(p -> p.getCharacter().getId().equals(participant.getCharacter().getId()));
     }
 }

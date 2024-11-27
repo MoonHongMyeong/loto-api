@@ -1,7 +1,6 @@
 package gg.loto.party.vote.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import gg.loto.global.entity.BaseEntity;
 import gg.loto.party.domain.Party;
 import gg.loto.party.vote.domain.PartyRaidVote;
 import gg.loto.party.vote.domain.VoteStatus;
@@ -47,7 +46,8 @@ public class VoteSaveRequest extends BaseVoteRequest {
     private LocalDateTime voteExpiresAt;
 
     @Builder
-    public VoteSaveRequest(String name, LocalDateTime raidDatetime, String raidType, String difficulty, int targetGateNumber, LocalDateTime voteExpiresAt){
+    public VoteSaveRequest(Long characterId, String name, LocalDateTime raidDatetime, String raidType, String difficulty, int targetGateNumber, LocalDateTime voteExpiresAt){
+        this.characterId = characterId;
         this.name = name;
         this.raidDatetime = raidDatetime;
         this.raidType = raidType;
