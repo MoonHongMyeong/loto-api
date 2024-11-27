@@ -16,10 +16,12 @@ public class PartyRaidVoteParticipant extends BaseEntity {
     private PartyRaidVoteParticipantId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("vote_id")
     @JoinColumn(name = "vote_id", nullable = false)
     private PartyRaidVote vote;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("character_id")
     @JoinColumn(name = "character_id", nullable = false)
     private Characters character;
 
