@@ -82,6 +82,7 @@ public class PartyRaidVoteService {
         return VoteResponse.of(vote);
     }
 
+    @Transactional
     public VoteResponse joinVote(SessionUser sessionUser, Long voteId, VoteParticipantSaveRequest dto) {
         User user = userFindDao.getCurrentUser(sessionUser);
         PartyRaidVote vote = voteRepository.findById(voteId)
@@ -96,12 +97,35 @@ public class PartyRaidVoteService {
             throw new IllegalArgumentException("본인의 캐릭터만 참여할 수 있습니다.");
         }
 
-        // 중복 참여 체크
         if (vote.hasParticipant(character)) {
             throw new IllegalArgumentException("이미 참여한 캐릭터입니다.");
         }
 
         vote.join(character);
+        return VoteResponse.of(vote);
+    }
+
+    @Transactional
+    public VoteResponse leaveVote(SessionUser sessionUser, Long voteId, Long characterId) {
+        User user = userFindDao.getCurrentUser(sessionUser);
+        PartyRaidVote vote = voteRepository.findById(voteId)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+
+        if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
+            throw new IllegalArgumentException("진행 중인 투표만 취소할 수 있습니다.");
+        }
+
+        Characters character = characterFindDao.findById(characterId);
+        if (!character.isOwnership(user)) {
+            throw new IllegalArgumentException("본인의 캐릭터만 참여 취소할 수 있습니다.");
+        }
+
+        if (!vote.hasParticipant(character)) {
+            throw new IllegalArgumentException("투표에 참여하지 않은 캐릭터입니다.");
+        }
+
+        vote.leave(character);
+
         return VoteResponse.of(vote);
     }
 }

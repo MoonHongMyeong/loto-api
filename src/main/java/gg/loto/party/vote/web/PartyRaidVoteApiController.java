@@ -33,8 +33,13 @@ public class PartyRaidVoteApiController {
         return ResponseEntity.ok(voteService.cancelVote(user, voteId));
     }
 
-    @PostMapping("/{voteId}/participant")
+    @PostMapping("/{voteId}/participants")
     public ResponseEntity<VoteResponse> joinVote(@LoginUser SessionUser user, @PathVariable(name = "voteId") Long voteId, @Valid @RequestBody VoteParticipantSaveRequest dto){
         return ResponseEntity.ok(voteService.joinVote(user, voteId, dto));
+    }
+
+    @DeleteMapping("/{voteId}/participants/{characterId}")
+    public ResponseEntity<VoteResponse> leaveVote(@LoginUser SessionUser user, @PathVariable(name = "voteId") Long voteId, @PathVariable(name = "characterId") Long characterId){
+        return ResponseEntity.ok(voteService.leaveVote(user, voteId, characterId));
     }
 }

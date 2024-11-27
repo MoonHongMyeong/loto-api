@@ -83,7 +83,7 @@ public class PartyRaidVote extends BaseEntity {
         this.participants.add(participant);
     }
 
-    public void removeParticipant(Characters character){
+    public void leave(Characters character){
         this.participants.removeIf(participant -> participant.getCharacter().equals(character));
     }
 
