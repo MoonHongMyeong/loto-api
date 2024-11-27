@@ -32,7 +32,10 @@ public class PartyRaidVote extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User creator;
 
-    @Column(name = "raid_datetime")
+    @Column(nullable = true)
+    private String name;
+
+    @Column(name = "raid_datetime", nullable = false)
     private LocalDateTime raidDatetime;
 
     @Enumerated(EnumType.STRING)
@@ -57,11 +60,12 @@ public class PartyRaidVote extends BaseEntity {
     private List<PartyRaidVoteParticipant> participants = new ArrayList<>();
 
     @Builder
-    public PartyRaidVote(Party party, User creator,
+    public PartyRaidVote(Party party, User creator, String name,
                          RaidType raidType, Difficulty difficulty, int targetGateNumber,
                          LocalDateTime raidDatetime, LocalDateTime voteExpiresAt, VoteStatus voteStatus){
         this.party = party;
         this.creator = creator;
+        this.name = name;
         this.raidType = raidType;
         this.difficulty = difficulty;
         this.targetGateNumber = targetGateNumber;
