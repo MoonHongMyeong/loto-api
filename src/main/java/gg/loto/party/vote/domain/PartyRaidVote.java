@@ -109,7 +109,6 @@ public class PartyRaidVote extends BaseEntity {
     }
 
     public boolean hasParticipant(PartyRaidVoteParticipant participant) {
-        return this.participants.stream()
-                .anyMatch(p -> p.getCharacter().getId().equals(participant.getCharacter().getId()));
+        return this.participants.contains(participant);
     }
 }

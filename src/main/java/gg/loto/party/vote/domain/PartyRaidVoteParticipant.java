@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.util.Objects;
 
 @Getter
 @Entity
@@ -16,12 +17,12 @@ public class PartyRaidVoteParticipant extends BaseEntity {
     private PartyRaidVoteParticipantId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("vote_id")
+    @MapsId("voteId")
     @JoinColumn(name = "vote_id", nullable = false)
     private PartyRaidVote vote;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("character_id")
+    @MapsId("characterId")
     @JoinColumn(name = "character_id", nullable = false)
     private Characters character;
 
@@ -30,5 +31,18 @@ public class PartyRaidVoteParticipant extends BaseEntity {
         this.id = new PartyRaidVoteParticipantId(vote.getId(), character.getId());
         this.vote = vote;
         this.character = character;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PartyRaidVoteParticipant)) return false;
+        PartyRaidVoteParticipant that = (PartyRaidVoteParticipant) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
