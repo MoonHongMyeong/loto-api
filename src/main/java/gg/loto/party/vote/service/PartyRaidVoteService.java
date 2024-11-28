@@ -13,7 +13,6 @@ import gg.loto.party.vote.web.dto.VoteResponse;
 import gg.loto.party.vote.web.dto.VoteSaveRequest;
 import gg.loto.party.vote.web.dto.VoteUpdateRequest;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PartyRaidVoteService {
-    private final UserFindDao userFindDao;
     private final PartyFindDao partyFindDao;
     private final CharacterFindDao characterFindDao;
     private final PartyRaidVoteRepository voteRepository;

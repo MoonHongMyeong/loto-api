@@ -4,7 +4,6 @@ import gg.loto.openapi.dto.CharacterOpenApiRequest;
 import gg.loto.openapi.dto.CharacterOpenApiResponse;
 import gg.loto.openapi.infrastructure.client.LostarkApiClient;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -18,7 +17,6 @@ public class OpenApiRequestService {
     private final String LOSTARK_API_KEY;
 
     private final LostarkApiClient lostarkApiClient;
-    private final UserFindDao userFindDao;
 
     public CharacterOpenApiResponse getCharacterProfiles(CharacterOpenApiRequest dto, User user) {
         String apiKey = determineApiKey(user);
