@@ -1,6 +1,5 @@
 package gg.loto.openapi.service;
 
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.openapi.dto.CharacterOpenApiRequest;
 import gg.loto.openapi.dto.CharacterOpenApiResponse;
 import gg.loto.openapi.infrastructure.client.LostarkApiClient;
@@ -21,9 +20,7 @@ public class OpenApiRequestService {
     private final LostarkApiClient lostarkApiClient;
     private final UserFindDao userFindDao;
 
-    public CharacterOpenApiResponse getCharacterProfiles(CharacterOpenApiRequest dto, SessionUser sessionUser) {
-        User user = userFindDao.getCurrentUser(sessionUser);
-
+    public CharacterOpenApiResponse getCharacterProfiles(CharacterOpenApiRequest dto, User user) {
         String apiKey = determineApiKey(user);
 
         return lostarkApiClient.fetchCharacterProfile(dto.getCharacterName(), apiKey);

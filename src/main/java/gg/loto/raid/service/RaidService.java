@@ -3,14 +3,12 @@ package gg.loto.raid.service;
 import gg.loto.character.domain.Characters;
 import gg.loto.character.service.CharacterFindDao;
 import gg.loto.character.web.dto.CharacterListResponse;
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.raid.entity.CharacterWeeklyRaid;
 import gg.loto.raid.entity.Difficulty;
 import gg.loto.raid.entity.RaidType;
 import gg.loto.raid.web.dto.RaidSaveRequest;
 import gg.loto.raid.web.dto.RaidUpdateRequest;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class RaidService {
-    private final UserFindDao userFindDao;
     private final CharacterFindDao characterFindDao;
     @Transactional
-    public CharacterListResponse saveWeeklyRaid(SessionUser sessionUser, Long characterId, RaidSaveRequest dto) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public CharacterListResponse saveWeeklyRaid(User user, Long characterId, RaidSaveRequest dto) {
         Characters character = characterFindDao.findById(characterId);
 
         if (!character.isOwnership(user)) {
@@ -44,8 +40,7 @@ public class RaidService {
     }
 
     @Transactional
-    public CharacterListResponse updateWeeklyRaid(SessionUser sessionUser, Long characterId, Long raidId, RaidUpdateRequest dto) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public CharacterListResponse updateWeeklyRaid(User user, Long characterId, Long raidId, RaidUpdateRequest dto) {
         Characters character = characterFindDao.findById(characterId);
 
         if (!character.isOwnership(user)) {
@@ -63,8 +58,7 @@ public class RaidService {
     }
 
     @Transactional
-    public CharacterListResponse removeWeeklyRaid(SessionUser sessionUser, Long characterId, Long raidId) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public CharacterListResponse removeWeeklyRaid(User user, Long characterId, Long raidId) {
         Characters character = characterFindDao.findById(characterId);
 
         if (!character.isOwnership(user)) {

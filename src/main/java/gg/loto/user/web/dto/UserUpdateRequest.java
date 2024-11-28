@@ -2,6 +2,7 @@ package gg.loto.user.web.dto;
 
 import java.util.Optional;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,25 +10,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class UserUpdateRequest {
+    @NotBlank(message = "변경할 닉네임을 입력해주세요.")
     private String nickname;
-    private String password;
 
     @Builder
-    public UserUpdateRequest(String nickname, String password) {
+    public UserUpdateRequest(String nickname) {
         this.nickname = nickname;
-        this.password = password;
-    }
-
-    public boolean hasNoChanges() {
-        return (nickname == null || nickname.isBlank()) && 
-               (password == null || password.isBlank());
-    }
-
-    public Optional<String> getNickname() {
-        return Optional.ofNullable(nickname).filter(n -> !n.isBlank());
-    }
-
-    public Optional<String> getPassword() {
-        return Optional.ofNullable(password).filter(p -> !p.isBlank());
     }
 }

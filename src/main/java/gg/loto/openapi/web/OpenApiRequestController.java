@@ -1,10 +1,10 @@
 package gg.loto.openapi.web;
 
 import gg.loto.global.auth.LoginUser;
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.openapi.dto.CharacterOpenApiRequest;
 import gg.loto.openapi.dto.CharacterOpenApiResponse;
 import gg.loto.openapi.service.OpenApiRequestService;
+import gg.loto.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -22,7 +22,7 @@ public class OpenApiRequestController {
     private final OpenApiRequestService openApiRequestService;
 
     @PostMapping("/character")
-    public ResponseEntity<CharacterOpenApiResponse> requestCharacterProfiles(@LoginUser SessionUser user, @Valid @RequestBody CharacterOpenApiRequest dto){
+    public ResponseEntity<CharacterOpenApiResponse> requestCharacterProfiles(@LoginUser User user, @Valid @RequestBody CharacterOpenApiRequest dto){
         return ResponseEntity.ok(openApiRequestService.getCharacterProfiles(dto, user));
     }
 }

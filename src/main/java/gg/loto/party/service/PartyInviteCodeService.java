@@ -1,6 +1,5 @@
 package gg.loto.party.service;
 
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.domain.Party;
 import gg.loto.party.domain.PartyInviteCodes;
 import gg.loto.party.repository.PartyInviteCodesRepository;
@@ -24,8 +23,7 @@ public class PartyInviteCodeService {
     private final UserFindDao userFindDao;
 
     @Transactional
-    public InviteCodeResponse createInviteCode(SessionUser sessionUser, PartyInviteCodeCreateRequest dto) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public InviteCodeResponse createInviteCode(User user, PartyInviteCodeCreateRequest dto) {
         Party party = partyFindDao.findPartyById(dto.getPartyId());
 
         if (!party.isPartyLeader(user)){

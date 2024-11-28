@@ -1,13 +1,11 @@
 package gg.loto.user.web;
 
-import gg.loto.global.auth.dto.SessionUser;
+import gg.loto.user.domain.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
-import gg.loto.user.web.dto.UserSaveRequest;
-import gg.loto.user.web.dto.UserResponse;
 import gg.loto.user.web.dto.UserUpdateRequest;
 import gg.loto.global.auth.LoginUser;
 import gg.loto.user.service.UserService;
@@ -19,24 +17,19 @@ public class UserApiController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<UserResponse> signUp(@RequestBody UserSaveRequest userSaveRequest) {
-        return ResponseEntity.ok(userService.signUp(userSaveRequest));
-    }
-
     @PutMapping
-    public ResponseEntity<UserResponse> updateProfile(@LoginUser SessionUser sessionUser, @RequestBody UserUpdateRequest userUpdateRequest) {
-        return ResponseEntity.ok(userService.updateProfile(sessionUser.getId(), userUpdateRequest));
+    public ResponseEntity<User> updateProfile(@LoginUser User user, @RequestBody UserUpdateRequest userUpdateRequest) {
+        return ResponseEntity.ok(userService.updateProfile(user, userUpdateRequest));
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> withdraw(@LoginUser SessionUser sessionUser) {
-        userService.withdraw(sessionUser.getId());
+    public ResponseEntity<Void> withdraw(@LoginUser User user) {
+        userService.withdraw(user);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getMyProfile(@LoginUser SessionUser sessionUser){
-        return ResponseEntity.ok(userService.showProfile(sessionUser.getId()));
+    public ResponseEntity<User> getMyProfile(@LoginUser User user){
+        return ResponseEntity.ok(userService.showProfile(user));
     }
 }

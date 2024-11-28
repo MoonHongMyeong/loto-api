@@ -1,6 +1,5 @@
 package gg.loto.global.auth;
 
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.global.auth.provider.JwtTokenProvider;
 import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
