@@ -6,9 +6,7 @@ import gg.loto.character.web.dto.CharacterListResponse;
 import gg.loto.character.web.dto.CharacterResponse;
 import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +19,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CharactersService {
     private final CharactersRepository charactersRepository;
-    private final UserFindDao userFindDao;
 
     @Transactional
-    public CharacterResponse createCharacter(SessionUser sessionUser, CharacterSaveRequest dto) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public CharacterResponse createCharacter(User user, CharacterSaveRequest dto) {
         validateDuplicateCharacter(dto.getCharacterName(), user.getId());
 
         Characters character = dto.toEntity(user);
@@ -43,14 +39,14 @@ public class CharactersService {
     }
 
     @Transactional(readOnly = true)
-    public List<CharacterListResponse> getUserCharacters(SessionUser user) {
+    public List<CharacterListResponse> getUserCharacters(User user) {
         return charactersRepository.findAllByUserIdOrderByItemMaxLevelDesc(user.getId()).stream()
                 .map(CharacterListResponse::of)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public CharacterResponse updateCharacter(SessionUser user, Long characterId, CharacterUpdateRequest dto) {
+    public CharacterResponse updateCharacter(User user, Long characterId, CharacterUpdateRequest dto) {
 
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
                 .orElseThrow(() -> new RuntimeException("잘못된 요청입니다."));
@@ -60,7 +56,7 @@ public class CharactersService {
         return CharacterResponse.of(character);
     }
     @Transactional
-    public void deleteCharacter(SessionUser user, Long characterId) {
+    public void deleteCharacter(User user, Long characterId) {
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
 
@@ -68,7 +64,7 @@ public class CharactersService {
     }
 
     @Transactional(readOnly = true)
-    public CharacterResponse getUserCharacter(SessionUser user, Long characterId) {
+    public CharacterResponse getUserCharacter(User user, Long characterId) {
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("캐릭터가 없습니다."));
         return CharacterResponse.of(character);

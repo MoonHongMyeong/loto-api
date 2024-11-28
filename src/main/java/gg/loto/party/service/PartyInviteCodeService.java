@@ -1,6 +1,5 @@
 package gg.loto.party.service;
 
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.domain.Party;
 import gg.loto.party.domain.PartyInviteCodes;
 import gg.loto.party.repository.PartyInviteCodesRepository;
@@ -8,7 +7,6 @@ import gg.loto.party.web.dto.InviteCodeResponse;
 import gg.loto.party.web.dto.PartyInviteCodeCreateRequest;
 import gg.loto.party.web.dto.PartyResponse;
 import gg.loto.user.domain.User;
-import gg.loto.user.service.UserFindDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +19,9 @@ public class PartyInviteCodeService {
 
     private final PartyInviteCodesRepository inviteCodesRepository;
     private final PartyFindDao partyFindDao;
-    private final UserFindDao userFindDao;
 
     @Transactional
-    public InviteCodeResponse createInviteCode(SessionUser sessionUser, PartyInviteCodeCreateRequest dto) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public InviteCodeResponse createInviteCode(User user, PartyInviteCodeCreateRequest dto) {
         Party party = partyFindDao.findPartyById(dto.getPartyId());
 
         if (!party.isPartyLeader(user)){

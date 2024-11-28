@@ -1,12 +1,11 @@
 package gg.loto.party.web;
 
 import gg.loto.global.auth.LoginUser;
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.service.PartyInviteCodeService;
-import gg.loto.party.service.PartyService;
 import gg.loto.party.web.dto.InviteCodeResponse;
 import gg.loto.party.web.dto.PartyInviteCodeCreateRequest;
 import gg.loto.party.web.dto.PartyResponse;
+import gg.loto.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,7 @@ public class InviteCodeApiController {
     private final PartyInviteCodeService inviteCodeService;
     @PostMapping
     public ResponseEntity<InviteCodeResponse> createInviteCode(
-            @LoginUser SessionUser user,
+            @LoginUser User user,
             @Valid @RequestBody PartyInviteCodeCreateRequest dto)
     {
         return ResponseEntity.ok(inviteCodeService.createInviteCode(user, dto));
@@ -27,7 +26,7 @@ public class InviteCodeApiController {
 
     @GetMapping("/{code}")
     public ResponseEntity<PartyResponse> getPartyByInviteCode(
-            @LoginUser SessionUser user,
+            @LoginUser User user,
             @PathVariable String code)
     {
         return ResponseEntity.ok(inviteCodeService.getPartyByInviteCode(code));
