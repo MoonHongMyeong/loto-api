@@ -6,25 +6,27 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public enum RaidType {
-    VALTAN("발탄", 2),
-    VYKAS("비아키스", 2),
-    KOUKUSATON("쿠크세이튼", 3),
-    ABRELSHUD("아브렐슈드", 4),
-    ILLIAKKAN("일리아칸", 3),
-    KAMEN("카멘", 4),
-    KAYANGEL("카양겔", 3),
-    IVORYTOWER("상아탑", 3),
-    ECHIDNA("에키드나", 2),
-    BEHEMOTH("베히모스", 2),
-    KAZEROTH_STAGE1_EGIR("에기르", 2),
-    KAZEROTH_STAGE2_ABRELSHUD("아브렐슈드2막", 2);
+    VALTAN("발탄", 2, 8),
+    VYKAS("비아키스", 2, 8),
+    KOUKUSATON("쿠크세이튼", 3, 4),
+    ABRELSHUD("아브렐슈드", 4, 8),
+    ILLIAKKAN("일리아칸", 3, 8),
+    KAMEN("카멘", 4, 8),
+    KAYANGEL("카양겔", 3, 4),
+    IVORYTOWER("상아탑", 3, 4),
+    ECHIDNA("에키드나", 2, 8),
+    BEHEMOTH("베히모스", 2, 16),
+    KAZEROTH_STAGE1_EGIR("에기르", 2, 8),
+    KAZEROTH_STAGE2_ABRELSHUD("아브렐슈드2막", 2, 8);
 
     private String bossNameKor;
     private int stageCount;
+    private int requiredPartySize;
 
-    RaidType(String bossNameKor, int stageCount) {
+    RaidType(String bossNameKor, int stageCount, int requiredPartySize) {
         this.bossNameKor = bossNameKor;
         this.stageCount = stageCount;
+        this.requiredPartySize = requiredPartySize;
     }
 
     public int getRequiredItemLevel(Difficulty difficulty){
