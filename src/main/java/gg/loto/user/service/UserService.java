@@ -3,8 +3,6 @@ package gg.loto.user.service;
 import gg.loto.auth.service.LoginService;
 import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
-import gg.loto.user.web.dto.UserResponse;
-import gg.loto.user.web.dto.UserSaveRequest;
 import gg.loto.user.web.dto.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

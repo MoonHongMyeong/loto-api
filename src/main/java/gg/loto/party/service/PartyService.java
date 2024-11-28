@@ -150,9 +150,10 @@ public class PartyService {
     public void kickMember(User user, Long partyId, Long userId) {
         Party party = partyFindDao.findPartyById(partyId);
         if (!party.isPartyLeader(user)) throw new RuntimeException("권한이 없는 요청입니다.");
-        if (party.isPartyLeader(user)) throw new IllegalArgumentException("방장을 강제 퇴장시킬 수 없습니다.");
-    
-        gg.loto.user.domain.User targetUser = userFindDao.findById(userId);
+        if (party.getUser().getId().equals(userId)) throw new IllegalArgumentException("방장을 강제 퇴장시킬 수 없습니다.");
+
+        User targetUser = userFindDao.findById(userId);
+
         if (!party.isPartyMember(targetUser)) throw new IllegalArgumentException("해당 유저는 공유방에 속해있지 않습니다.");
 
         partyMemberRepository.deleteByPartyIdAndUserId(party.getId(), userId);
