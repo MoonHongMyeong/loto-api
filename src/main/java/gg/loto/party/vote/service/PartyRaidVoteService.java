@@ -2,7 +2,6 @@ package gg.loto.party.vote.service;
 
 import gg.loto.character.domain.Characters;
 import gg.loto.character.service.CharacterFindDao;
-import gg.loto.global.auth.dto.SessionUser;
 import gg.loto.party.domain.Party;
 import gg.loto.party.service.PartyFindDao;
 import gg.loto.party.vote.domain.PartyRaidVote;
@@ -28,10 +27,9 @@ public class PartyRaidVoteService {
     private final PartyRaidVoteRepository voteRepository;
 
     @Transactional
-    public VoteResponse createVote(SessionUser sessionUser, Long partyId, VoteSaveRequest dto) {
+    public VoteResponse createVote(User user, Long partyId, VoteSaveRequest dto) {
         dto.validate();
 
-        User user = userFindDao.getCurrentUser(sessionUser);
         Party party = partyFindDao.findPartyById(partyId);
         if (!party.isPartyMember(user)) {
             throw new IllegalArgumentException("참여한 공유방만 투표생성이 가능합니다.");
@@ -52,10 +50,9 @@ public class PartyRaidVoteService {
     }
 
     @Transactional
-    public VoteResponse updateVote(SessionUser sessionUser, Long voteId, VoteUpdateRequest dto) {
+    public VoteResponse updateVote(User user, Long voteId, VoteUpdateRequest dto) {
         dto.validate();
 
-        User user = userFindDao.getCurrentUser(sessionUser);
         PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
         if ( !vote.isCreator(user) ) {
             throw new IllegalArgumentException("투표 수정은 투표 생성자만 가능합니다.");
@@ -70,8 +67,7 @@ public class PartyRaidVoteService {
     }
 
     @Transactional
-    public VoteResponse cancelVote(SessionUser sessionUser, Long voteId) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public VoteResponse cancelVote(User user, Long voteId) {
         PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
 
         if ( !vote.isCreator(user) ) {
@@ -87,8 +83,7 @@ public class PartyRaidVoteService {
     }
 
     @Transactional
-    public VoteResponse joinVote(SessionUser sessionUser, Long voteId, VoteParticipantSaveRequest dto) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public VoteResponse joinVote(User user, Long voteId, VoteParticipantSaveRequest dto) {
         PartyRaidVote vote = voteRepository.findById(voteId)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
 
@@ -119,8 +114,7 @@ public class PartyRaidVoteService {
     }
 
     @Transactional
-    public VoteResponse leaveVote(SessionUser sessionUser, Long voteId, Long characterId) {
-        User user = userFindDao.getCurrentUser(sessionUser);
+    public VoteResponse leaveVote(User user, Long voteId, Long characterId) {
         PartyRaidVote vote = voteRepository.findById(voteId)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
 
