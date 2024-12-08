@@ -34,7 +34,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -46,15 +46,17 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(secretKey.getBytes())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
-        } catch (SignatureException | MalformedJwtException e) {
+        } catch (SecurityException | MalformedJwtException e) {
             throw new RuntimeException("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             throw new RuntimeException("만료된 JWT 토큰입니다.");
@@ -67,8 +69,9 @@ public class JwtTokenProvider {
 
     public Claims getClaims(String token) {
         try {
-            return Jwts.parser()
-                    .setSigningKey(secretKey)
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
