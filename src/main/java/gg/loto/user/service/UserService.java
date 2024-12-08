@@ -5,7 +5,6 @@ import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
 import gg.loto.user.web.dto.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +15,7 @@ public class UserService {
 
     private final LoginService loginService;
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    
+
     @Transactional
     public User updateProfile(User user, UserUpdateRequest request) {
         user.changeNickname(request.getNickname());
