@@ -22,7 +22,10 @@ public enum ErrorCode {
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
     EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
     INVALID_TOKEN(403, "Invalid Token", "잘못된 토큰입니다."),
-
+    // open api
+    INVALID_API_KEY(401, "Invalid API Key", "API 키가 유효하지 않습니다."),
+    API_REQUEST_ERROR(400, "API Request Error", "API 요청 오류가 발생했습니다."),
+    LOSTARK_SERVER_ERROR(503, "Lostark Server Error", "로스트아크 서버 오류가 발생했습니다."),
     // character
     EXISTS_CHARACTER(400, "Already Exists Character", "같은 캐릭터가 이미 존재합니다."),
     // party

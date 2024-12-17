@@ -2,6 +2,8 @@ package gg.loto.openapi.infrastructure.client;
 
 import java.util.Map;
 
+import gg.loto.global.exception.ErrorCode;
+import gg.loto.openapi.exception.OpenApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
@@ -41,21 +43,21 @@ public class LostarkApiClient {
             responseBody = response.getBody();
 
         } catch (HttpClientErrorException.NotFound e) {
-            throw new IllegalArgumentException("캐릭터를 찾을 수 없습니다.");
+            throw new OpenApiException(ErrorCode.CHARACTER_NOT_FOUND);
         } catch (HttpClientErrorException.Unauthorized e) {
-            throw new IllegalArgumentException("API 키가 유효하지 않습니다.");
+            throw new OpenApiException(ErrorCode.INVALID_API_KEY);
         } catch (HttpClientErrorException.Forbidden e) {
-            throw new IllegalArgumentException("API 키가 유효하지 않습니다.");
+            throw new OpenApiException(ErrorCode.INVALID_API_KEY);
         } catch (HttpClientErrorException e) {
-            throw new RuntimeException("API 요청 오류가 발생했습니다.");
+            throw new OpenApiException(ErrorCode.API_REQUEST_ERROR);
         } catch (HttpServerErrorException e) {
-            throw new RuntimeException("로스트아크 서버 오류가 발생했습니다.");
+            throw new OpenApiException(ErrorCode.LOSTARK_SERVER_ERROR);
         } catch (Exception e) {
-            throw new RuntimeException("API 요청 오류가 발생했습니다.");
+            throw new OpenApiException(ErrorCode.API_REQUEST_ERROR);
         }
 
         if ( responseBody == null ) {
-            throw new IllegalArgumentException("캐릭터를 찾을 수 없습니다.");
+            throw new OpenApiException(ErrorCode.CHARACTER_NOT_FOUND);
         }
 
         return convertToCharacterOpenapiResponse(responseBody);
