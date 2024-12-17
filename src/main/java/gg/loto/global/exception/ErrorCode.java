@@ -16,11 +16,14 @@ public enum ErrorCode {
     // not found
     TOKEN_NOT_FOUND(404, "Token Not Found", "토큰 정보를 찾을 수 없습니다."),
     USER_NOT_FOUND(404, "User Not Found", "사용자를 찾을 수 없습니다."),
-
+    CHARACTER_NOT_FOUND(404, "Character Not Found", "캐릭터를 찾을 수 없습니다."),
     // token
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
     EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
     INVALID_TOKEN(403, "Invalid Token", "잘못된 토큰입니다."),
+
+    // character
+    EXISTS_CHARACTER(409, "Already Exists Character", "캐릭터가 이미 존재합니다.")
     ;
 
     private final int httpStatus;

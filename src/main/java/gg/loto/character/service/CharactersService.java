@@ -1,11 +1,14 @@
 package gg.loto.character.service;
 
 import gg.loto.character.domain.Characters;
+import gg.loto.character.exception.CharacterException;
 import gg.loto.character.repository.CharactersRepository;
 import gg.loto.character.web.dto.CharacterListResponse;
 import gg.loto.character.web.dto.CharacterResponse;
 import gg.loto.character.web.dto.CharacterSaveRequest;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,7 @@ public class CharactersService {
     private void validateDuplicateCharacter(String characterName, Long userId) {
         charactersRepository.findByCharacterNameAndUserId(characterName, userId)
                 .ifPresent(character -> {
-                    throw new IllegalArgumentException("이미 존재하는 캐릭터입니다.");
+                    throw new CharacterException(ErrorCode.EXISTS_CHARACTER);
                 });
     }
 
@@ -49,7 +52,7 @@ public class CharactersService {
     public CharacterResponse updateCharacter(User user, Long characterId, CharacterUpdateRequest dto) {
 
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
-                .orElseThrow(() -> new RuntimeException("잘못된 요청입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CHARACTER_NOT_FOUND));
 
         character.update(dto);
 
@@ -58,7 +61,7 @@ public class CharactersService {
     @Transactional
     public void deleteCharacter(User user, Long characterId) {
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CHARACTER_NOT_FOUND));
 
         charactersRepository.delete(character);
     }
@@ -66,7 +69,7 @@ public class CharactersService {
     @Transactional(readOnly = true)
     public CharacterResponse getUserCharacter(User user, Long characterId) {
         Characters character = charactersRepository.findByIdAndUserId(characterId, user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("캐릭터가 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CHARACTER_NOT_FOUND));
         return CharacterResponse.of(character);
     }
 
