@@ -32,4 +32,9 @@ public class AuthApiController {
         authService.logout(request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/token/refresh")
+    public ResponseEntity<UserResponse> refreshToken(@RequestBody JwtTokenRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request));
+    }
 }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final DiscordOAuth2Service discordOAuth2Service;
     private final JwtLoginService jwtLoginService;
-
+    
     public UserResponse loginWithDiscord(String code) {
         return discordOAuth2Service.login(code);
     }
@@ -22,4 +22,4 @@ public class AuthService {
     public void logout(JwtTokenRequest request) {
         jwtLoginService.logout(request);
     }
-}
+} 

@@ -53,18 +53,16 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(secretKey.getBytes())
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            throw new RuntimeException("잘못된 JWT 서명입니다.");
+                    
+            return !claims.getBody().getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
-            throw new RuntimeException("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            throw new RuntimeException("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("JWT 토큰이 잘못되었습니다.");
+            throw new RuntimeException("만료된 토큰입니다.");
+        } catch (JwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
         }
     }
 
