@@ -83,7 +83,7 @@ public class CharactersService {
                 .anyMatch(character -> !character.getUser().equals(user));
         
         if (hasInvalidCharacterOwnership){
-            throw new RuntimeException("본인이 등록한 캐릭터만 공유방에 참여, 탈퇴 할 수 있습니다.");
+            throw new CharacterException(ErrorCode.NOT_CHARACTER_OWNER);
         }
     }
 

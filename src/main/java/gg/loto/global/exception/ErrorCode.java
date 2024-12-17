@@ -18,6 +18,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "User Not Found", "사용자를 찾을 수 없습니다."),
     CHARACTER_NOT_FOUND(404, "Character Not Found", "캐릭터를 찾을 수 없습니다."),
     PARTY_NOT_FOUND(404, "Party Not Found", "공유방을 찾을 수 없습니다."),
+    RAID_RECORD_NOT_FOUND(404, "Raid Record Not Found", "레이드 기록을 찾을 수 없습니다."),
     // token
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
     EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
@@ -38,7 +39,11 @@ public enum ErrorCode {
     TARGET_NOT_PARTY_MEMBER(400, "Target Not Party Member", "해당 유저는 공유방에 속해있지 않습니다."),
     PARTY_LEADER_MINIMUM_CHARACTER_REQUIRED(400, "Party Leader Minimum Character Required", "방장은 최소 한 캐릭터는 소유해야 합니다.\n공유방을 떠나려면 다른 사용자에게 방장을 위임해주세요."),
     CANNOT_KICK_PARTY_LEADER(400, "Cannot Kick Party Leader", "방장을 강제 퇴장시킬 수 없습니다."),
-    CANNOT_DELETE_ACTIVE_PARTY(400, "Cannot Delete Active Party", "공유방에 다른 사용자가 있으면 삭제가 불가능합니다.")
+    CANNOT_DELETE_ACTIVE_PARTY(400, "Cannot Delete Active Party", "공유방에 다른 사용자가 있으면 삭제가 불가능합니다."),
+    // raid
+    NOT_CHARACTER_OWNER(403, "Not Character Owner", "본인이 소유한 캐릭터만 가능한 요청입니다."),
+    INSUFFICIENT_ITEM_LEVEL(400, "Insufficient Item Level", "아이템 레벨이 부족합니다.")
+
     ;
 
     private final int httpStatus;
