@@ -28,9 +28,4 @@ public class UserService {
         tokenRepository.deleteByUser(user);
         userRepository.delete(user);
     }
-
-    @Transactional(readOnly = true)
-    public User showProfile(User user) {
-        return user;
-    }
 }

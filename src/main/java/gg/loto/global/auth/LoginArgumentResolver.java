@@ -6,7 +6,6 @@ import gg.loto.global.auth.exception.TokenException;
 import gg.loto.global.exception.EntityNotFoundException;
 import gg.loto.global.exception.ErrorCode;
 import gg.loto.user.domain.User;
-import gg.loto.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
@@ -24,7 +23,6 @@ import java.nio.file.AccessDeniedException;
 @Component
 @RequiredArgsConstructor
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
-    private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
     @Override
@@ -47,7 +45,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
         Long userId = (Long) authentication.getPrincipal();
         Token token = tokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.TOKEN_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
         if (token.isAccessTokenExpired()) {
             if (token.isRefreshTokenExpired()) {

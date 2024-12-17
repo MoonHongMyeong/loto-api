@@ -15,6 +15,7 @@ public enum ErrorCode {
     HANDLE_ACCESS_DENIED(403, "Handle Access Denied", "엑세스가 거부되었습니다."),
     // not found
     TOKEN_NOT_FOUND(404, "Token Not Found", "토큰 정보를 찾을 수 없습니다."),
+    USER_NOT_FOUND(404, "User Not Found", "사용자를 찾을 수 없습니다."),
 
     // token
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
