@@ -19,6 +19,7 @@ public enum ErrorCode {
     CHARACTER_NOT_FOUND(404, "Character Not Found", "캐릭터를 찾을 수 없습니다."),
     PARTY_NOT_FOUND(404, "Party Not Found", "공유방을 찾을 수 없습니다."),
     RAID_RECORD_NOT_FOUND(404, "Raid Record Not Found", "레이드 기록을 찾을 수 없습니다."),
+    VOTE_NOT_FOUND(404, "Vote Not Found", "잘못된 투표 번호입니다."),
     // token
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
     EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
@@ -48,6 +49,15 @@ public enum ErrorCode {
     INVALID_RAID_DIFFICULTY(400, "Invalid Raid Difficulty", "유효하지 않은 난이도입니다."),
     UNSUPPORTED_RAID_DIFFICULTY(400, "Unsupported Raid Difficulty", "해당 레이드는 선택한 난이도를 지원하지 않습니다."),
     INSUFFICIENT_ITEM_LEVEL_FOR_RAID(400, "Insufficient Item Level For Raid", "아이템 레벨이 부족합니다. 필요 레벨: %d"),
+    //vote
+    NOT_PARTY_MEMBER_FOR_VOTE(403, "Not Party Member For Vote", "참여한 공유방만 투표생성이 가능합니다."),
+    NOT_VOTE_CREATOR(403, "Not Vote Creator", "투표 생성자만 가능한 요청입니다."),
+    VOTE_NOT_IN_PROGRESS(400, "Vote Not In Progress", "투표 상태가 진행중이 아닙니다."),
+    VOTE_ALREADY_PARTICIPATED(409, "Vote Already Participated", "이미 참여한 캐릭터입니다."),
+    VOTE_PARTY_FULL(400, "Vote Party Full", "제한 인원이 초과되었습니다."),
+    CHARACTER_NOT_PARTICIPATED(400, "Character Not Participated", "투표에 참여하지 않은 캐릭터입니다."),
+    INVALID_VOTE_EXPIRY_TIME(400, "Invalid Vote Expiry Time", "투표 마감 시간은 레이드 시작 시간 이전이어야 합니다."),
+    INVALID_RAID_GATE_NUMBER(400, "Invalid Raid Gate Number", "유효하지 않은 관문 번호입니다."),
     ;
 
     private final int httpStatus;
