@@ -22,4 +22,8 @@ public class AuthService {
     public void logout(JwtTokenRequest request) {
         jwtLoginService.logout(request);
     }
+
+    public String refreshToken(JwtTokenRequest request) {
+        return jwtLoginService.refreshToken(request);
+    }
 } 

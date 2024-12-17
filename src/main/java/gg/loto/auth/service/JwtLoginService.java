@@ -3,7 +3,10 @@ package gg.loto.auth.service;
 import gg.loto.auth.domain.Token;
 import gg.loto.auth.repository.TokenRepository;
 import gg.loto.auth.web.dto.JwtTokenRequest;
+import gg.loto.global.auth.exception.TokenException;
 import gg.loto.global.auth.provider.JwtTokenProvider;
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.user.web.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,15 +23,15 @@ public class JwtLoginService {
     @Transactional
     public UserResponse login(JwtTokenRequest requestToken) {
         Token token = tokenRepository.findByAccessToken(requestToken.getAccessToken())
-                .orElseThrow(() -> new RuntimeException("토큰 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.TOKEN_NOT_FOUND));
 
-        if (token.getAccessTokenExpiresAt().isBefore(LocalDateTime.now())) {
-            if (token.getRefreshTokenExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.");
+        if (token.isAccessTokenExpired()) {
+            if (token.isRefreshTokenExpired()) {
+                throw new TokenException(token.getRefreshToken(), ErrorCode.EXPIRED_REFRESH_TOKEN);
             }
 
             if (!jwtTokenProvider.validateToken(token.getRefreshToken())) {
-                throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+                throw new TokenException(token.getRefreshToken(), ErrorCode.INVALID_TOKEN);
             }
 
             String newAccessToken = jwtTokenProvider.generateAccessToken(token.getUser());
@@ -39,7 +42,7 @@ public class JwtLoginService {
         }
 
         if (!jwtTokenProvider.validateToken(token.getAccessToken())) {
-            throw new RuntimeException("유효하지 않은 토큰입니다.");
+            throw new TokenException(token.getAccessToken(), ErrorCode.INVALID_TOKEN);
         }
 
         return UserResponse.from(token);
@@ -47,8 +50,26 @@ public class JwtLoginService {
 
     public void logout(JwtTokenRequest request) {
         Token token = tokenRepository.findByAccessToken(request.getAccessToken())
-                .orElseThrow(() -> new RuntimeException("토큰 정보가 존재하지 않습니다"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.TOKEN_NOT_FOUND));
 
         tokenRepository.delete(token);
+    }
+
+    public String refreshToken(JwtTokenRequest request) {
+        Token token = tokenRepository.findByAccessToken(request.getAccessToken())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.TOKEN_NOT_FOUND));
+
+        if (token.isRefreshTokenExpired()){
+            throw new TokenException(token.getRefreshToken(), ErrorCode.EXPIRED_REFRESH_TOKEN);
+        }
+
+        if (!jwtTokenProvider.validateToken(token.getRefreshToken())) {
+            throw new TokenException(token.getRefreshToken(), ErrorCode.INVALID_TOKEN);
+        }
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(token.getUser());
+        token.updateAccessToken(newAccessToken, LocalDateTime.now().plusMinutes(10));
+
+        return newAccessToken;
     }
 }

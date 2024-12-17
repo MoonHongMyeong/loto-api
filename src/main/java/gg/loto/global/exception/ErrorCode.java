@@ -13,10 +13,14 @@ public enum ErrorCode {
     ENTITY_NOT_FOUND(404,"Entity Not Found", "Entity 를 찾을 수 없습니다."),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed", "허용되지 않은 메소드"),
     HANDLE_ACCESS_DENIED(403, "Handle Access Denied", "엑세스가 거부되었습니다."),
+    // not found
+    TOKEN_NOT_FOUND(404, "Token Not Found", "토큰 정보를 찾을 수 없습니다."),
 
     // token
-    TOKEN_EXPIRES(401, "Token is expired", "토큰이 만료되었습니다."),
-    TOKEN_INVALID(403, "Invalid token", "잘못된 토큰입니다.");
+    EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
+    EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
+    INVALID_TOKEN(403, "Invalid Token", "잘못된 토큰입니다."),
+    ;
 
     private final int httpStatus;
     private final String code;

@@ -1,5 +1,7 @@
 package gg.loto.global.auth.provider;
 
+import gg.loto.global.auth.exception.TokenException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.user.domain.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -60,9 +62,9 @@ public class JwtTokenProvider {
                     
             return !claims.getBody().getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
-            throw new RuntimeException("만료된 토큰입니다.");
+            throw new TokenException(token, ErrorCode.EXPIRED_TOKEN);
         } catch (JwtException e) {
-            throw new RuntimeException("유효하지 않은 토큰입니다.");
+            throw new TokenException(token, ErrorCode.INVALID_TOKEN);
         }
     }
 

@@ -34,7 +34,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/token/refresh")
-    public ResponseEntity<UserResponse> refreshToken(@RequestBody JwtTokenRequest request) {
+    public ResponseEntity<String> refreshToken(@RequestBody JwtTokenRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 }
