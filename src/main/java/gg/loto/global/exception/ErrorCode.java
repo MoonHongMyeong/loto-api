@@ -42,8 +42,12 @@ public enum ErrorCode {
     CANNOT_DELETE_ACTIVE_PARTY(400, "Cannot Delete Active Party", "공유방에 다른 사용자가 있으면 삭제가 불가능합니다."),
     // raid
     NOT_CHARACTER_OWNER(403, "Not Character Owner", "본인이 소유한 캐릭터만 가능한 요청입니다."),
-    INSUFFICIENT_ITEM_LEVEL(400, "Insufficient Item Level", "아이템 레벨이 부족합니다.")
-
+    INSUFFICIENT_ITEM_LEVEL(400, "Insufficient Item Level", "아이템 레벨이 부족합니다."),
+    DUPLICATE_RAID_CHECK(400, "Duplicate Raid Check", "이미 체크된 레이드입니다."),
+    INVALID_RAID_STAGE(400, "Invalid Raid Stage", "유효하지 않은 관문입니다."),
+    INVALID_RAID_DIFFICULTY(400, "Invalid Raid Difficulty", "유효하지 않은 난이도입니다."),
+    UNSUPPORTED_RAID_DIFFICULTY(400, "Unsupported Raid Difficulty", "해당 레이드는 선택한 난이도를 지원하지 않습니다."),
+    INSUFFICIENT_ITEM_LEVEL_FOR_RAID(400, "Insufficient Item Level For Raid", "아이템 레벨이 부족합니다. 필요 레벨: %d"),
     ;
 
     private final int httpStatus;
