@@ -17,13 +17,25 @@ public enum ErrorCode {
     TOKEN_NOT_FOUND(404, "Token Not Found", "토큰 정보를 찾을 수 없습니다."),
     USER_NOT_FOUND(404, "User Not Found", "사용자를 찾을 수 없습니다."),
     CHARACTER_NOT_FOUND(404, "Character Not Found", "캐릭터를 찾을 수 없습니다."),
+    PARTY_NOT_FOUND(404, "Party Not Found", "공유방을 찾을 수 없습니다."),
     // token
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
     EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
     INVALID_TOKEN(403, "Invalid Token", "잘못된 토큰입니다."),
 
     // character
-    EXISTS_CHARACTER(409, "Already Exists Character", "캐릭터가 이미 존재합니다.")
+    EXISTS_CHARACTER(400, "Already Exists Character", "같은 캐릭터가 이미 존재합니다."),
+    // party
+    EXISTS_PARTY(400, "Already Exists Party", "같은 공유방이 이미 존재합니다."),
+    NOT_LEADER(403, "Not Party Leader", "공유방의 리더만 할 수 있는 요청입니다."),
+    NOT_EXISTS_CHARACTER(400, "Not Exists Character", "존재하지 않는 캐릭터가 포함되어 있습니다."),
+    DUPLICATE_CHARACTER_JOIN(400, "Duplicate Character Join", "이미 참여한 캐릭터입니다."),
+    PARTY_CAPACITY_EXCEEDED(400, "Party Capacity Exceeded", "공유방 인원 제한이 모두 차 입장할 수 없습니다."),
+    NOT_PARTY_MEMBER(403, "Not Party Member", "참여한 공유방이 아닙니다."),
+    TARGET_NOT_PARTY_MEMBER(400, "Target Not Party Member", "해당 유저는 공유방에 속해있지 않습니다."),
+    PARTY_LEADER_MINIMUM_CHARACTER_REQUIRED(400, "Party Leader Minimum Character Required", "방장은 최소 한 캐릭터는 소유해야 합니다.\n공유방을 떠나려면 다른 사용자에게 방장을 위임해주세요."),
+    CANNOT_KICK_PARTY_LEADER(400, "Cannot Kick Party Leader", "방장을 강제 퇴장시킬 수 없습니다."),
+    CANNOT_DELETE_ACTIVE_PARTY(400, "Cannot Delete Active Party", "공유방에 다른 사용자가 있으면 삭제가 불가능합니다.")
     ;
 
     private final int httpStatus;

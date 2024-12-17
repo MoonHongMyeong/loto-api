@@ -2,9 +2,10 @@ package gg.loto.party.service;
 
 import gg.loto.character.domain.Characters;
 import gg.loto.character.service.CharactersService;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.party.domain.Party;
+import gg.loto.party.exception.PartyException;
 import gg.loto.party.mapper.PartyMapper;
-import gg.loto.party.repository.PartyInviteCodesRepository;
 import gg.loto.party.repository.PartyMemberRepository;
 import gg.loto.party.repository.PartyRepository;
 import gg.loto.party.web.dto.*;
@@ -23,7 +24,6 @@ import java.util.stream.Collectors;
 public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyMemberRepository partyMemberRepository;
-    private final PartyInviteCodesRepository partyInviteCodesRepository;
     private final PartyMapper partyMapper;
     private final PartyFindDao partyFindDao;
     private final UserFindDao userFindDao;
@@ -41,14 +41,14 @@ public class PartyService {
     private void validateDuplicationPartyNameAndUserId(String name, Long userId) {
         partyRepository.findByNameAndUserId(name, userId)
                 .ifPresent(character -> {
-                    throw new IllegalArgumentException("이미 존재하는 공유방입니다.");
+                    throw new PartyException(ErrorCode.EXISTS_PARTY);
                 });
     }
 
     @Transactional
     public PartyResponse updateParty(User user, Long partyId, PartyUpdateRequest dto) {
         Party party = partyFindDao.findPartyById(partyId);
-        if (!party.isPartyLeader(user)) throw new RuntimeException("권한이 없는 요청입니다.");
+        if (!party.isPartyLeader(user)) throw new PartyException(ErrorCode.NOT_LEADER);
 
         party.update(dto);
 
@@ -58,7 +58,7 @@ public class PartyService {
     @Transactional
     public PartyResponse transferLeadership(User user, Long partyId, Long userId) {
         Party party = partyFindDao.findPartyById(partyId);
-        if (!party.isPartyLeader(user)) throw new RuntimeException("권한이 없는 요청입니다.");
+        if (!party.isPartyLeader(user)) throw new PartyException(ErrorCode.NOT_LEADER);
 
         User newLeader = userFindDao.findById(userId);
         party.transferLeadership(newLeader);
@@ -77,13 +77,13 @@ public class PartyService {
         List<Characters> characters = characterService.findAllById(dto.getCharacters());
         
         if (dto.getCharacters().size() != characters.size()){
-            throw new RuntimeException("존재하지 않는 캐릭터가 포함되어 있습니다.");
+            throw new PartyException(ErrorCode.NOT_EXISTS_CHARACTER);
         }
 
         characterService.validateCharacterOwnership(characters, user);
 
         if (isAlreadyJoinedCharacter(party, characters)){
-            throw new RuntimeException("중복된 캐릭터 참여입니다.");
+            throw new PartyException(ErrorCode.DUPLICATE_CHARACTER_JOIN);
         }
 
         characters.forEach(party::addMember);
@@ -105,7 +105,7 @@ public class PartyService {
         int currentJoinMemberSize = partyMapper.getJoinedMemberSize(party.getId());
 
         if(party.getCapacity() < currentJoinMemberSize + 1){
-            throw new RuntimeException("공유방 인원 제한이 모두 차 입장할 수 없습니다.");
+            throw new PartyException(ErrorCode.PARTY_CAPACITY_EXCEEDED);
         }
     }
 
@@ -113,12 +113,12 @@ public class PartyService {
     public void leaveParty(User user, Long partyId, PartyMemberRequest dto) {
         Party party = partyFindDao.findPartyById(partyId);
         if (!party.isPartyMember(user)) {
-            throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
+            throw new PartyException(ErrorCode.NOT_PARTY_MEMBER);
         }
 
         List<Characters> characters = characterService.findAllById(dto.getCharacters());
         if (dto.getCharacters().size() != characters.size()) {
-            throw new IllegalArgumentException("존재하지 않는 캐릭터가 포함되어 있습니다.");
+            throw new PartyException(ErrorCode.NOT_EXISTS_CHARACTER);
         }
 
         validatePartyMemberLeave(party, user, characters);
@@ -130,7 +130,7 @@ public class PartyService {
         characterService.validateCharacterOwnership(characters, user);
         
         if (!isAlreadyJoinedCharacter(party, characters)) {
-            throw new IllegalArgumentException("공유방에 참여하지 않은 캐릭터가 존재합니다.");
+            throw new PartyException(ErrorCode.NOT_EXISTS_CHARACTER);
         }
     
         if (party.isPartyLeader(user)) {
@@ -142,19 +142,19 @@ public class PartyService {
     private void validatePartyLeaderLeave(Party party, List<Characters> characters) {
         int partyLeaderCharactersSize = partyMapper.getPartyLeaderCharactersSize(party.getId());
         if (partyLeaderCharactersSize <= characters.size()) {
-            throw new IllegalArgumentException("방장은 최소 한 캐릭터는 소유해야 합니다.\n공유방을 떠나려면 다른 사용자에게 방장을 위임해주세요.");
+            throw new PartyException(ErrorCode.PARTY_LEADER_MINIMUM_CHARACTER_REQUIRED);
         }
     }
 
     @Transactional
     public void kickMember(User user, Long partyId, Long userId) {
         Party party = partyFindDao.findPartyById(partyId);
-        if (!party.isPartyLeader(user)) throw new RuntimeException("권한이 없는 요청입니다.");
-        if (party.getUser().getId().equals(userId)) throw new IllegalArgumentException("방장을 강제 퇴장시킬 수 없습니다.");
+        if (!party.isPartyLeader(user)) throw new PartyException(ErrorCode.NOT_LEADER);
+        if (party.getUser().getId().equals(userId)) throw new PartyException(ErrorCode.CANNOT_KICK_PARTY_LEADER);
 
         User targetUser = userFindDao.findById(userId);
 
-        if (!party.isPartyMember(targetUser)) throw new IllegalArgumentException("해당 유저는 공유방에 속해있지 않습니다.");
+        if (!party.isPartyMember(targetUser)) throw new PartyException(ErrorCode.TARGET_NOT_PARTY_MEMBER);
 
         partyMemberRepository.deleteByPartyIdAndUserId(party.getId(), userId);
     }
@@ -162,11 +162,11 @@ public class PartyService {
     @Transactional
     public void removeParty(User user, Long partyId) {
         Party party = partyFindDao.findPartyById(partyId);
-        if (!party.isPartyLeader(user)) throw new RuntimeException("권한이 없는 요청입니다.");
+        if (!party.isPartyLeader(user)) throw new PartyException(ErrorCode.NOT_LEADER);
 
         int joinedMemberSize = partyMapper.getJoinedMemberSize(partyId);
         if (joinedMemberSize > 1) {
-            throw new RuntimeException("공유방에 다른 사용자가 있으면 삭제가 불가능합니다.");
+            throw new PartyException(ErrorCode.CANNOT_DELETE_ACTIVE_PARTY);
         }
 
         partyRepository.delete(party);
@@ -182,7 +182,7 @@ public class PartyService {
         Party party = partyFindDao.findPartyById(partyId);
 
         if (!party.isPartyMember(user)) {
-            throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
+            throw new PartyException(ErrorCode.NOT_PARTY_MEMBER);
         }
 
         return PartyResponse.of(party);
@@ -193,7 +193,7 @@ public class PartyService {
         Party party = partyFindDao.findPartyById(partyId);
 
         if (!party.isPartyMember(user)) {
-            throw new IllegalArgumentException("참여한 공유방이 아닙니다.");
+            throw new PartyException(ErrorCode.NOT_PARTY_MEMBER);
         }
 
         int pageContentSize = isMobile ? 10: 30;
