@@ -1,6 +1,6 @@
 package gg.loto.user.service;
 
-import gg.loto.auth.service.LoginService;
+import gg.loto.auth.repository.TokenRepository;
 import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
 import gg.loto.user.web.dto.UserUpdateRequest;
@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final LoginService loginService;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
     @Transactional
     public User updateProfile(User user, UserUpdateRequest request) {
@@ -25,8 +25,8 @@ public class UserService {
     
     @Transactional
     public void withdraw(User user) {
+        tokenRepository.deleteByUser(user);
         userRepository.delete(user);
-        loginService.logout();
     }
 
     @Transactional(readOnly = true)
