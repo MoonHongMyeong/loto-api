@@ -2,6 +2,7 @@ package gg.loto.global.auth.provider;
 
 import gg.loto.user.domain.User;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

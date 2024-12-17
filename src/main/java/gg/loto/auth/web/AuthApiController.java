@@ -1,8 +1,8 @@
 package gg.loto.auth.web;
 
-import gg.loto.auth.service.LoginService;
-import gg.loto.auth.web.dto.DiscordTokenResponse;
-import jakarta.validation.Valid;
+import gg.loto.auth.service.AuthService;
+import gg.loto.auth.web.dto.JwtTokenRequest;
+import gg.loto.user.web.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,16 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthApiController {
 
-    private final LoginService loginService;
+    private final AuthService authService;
 
     @PostMapping("/discord/login")
-    public void login(@Valid @RequestBody DiscordTokenResponse token) {
-        loginService.login(token);
-    }   
+    public ResponseEntity<UserResponse> discordLogin(String code) {
+        return ResponseEntity.ok(authService.loginWithDiscord(code));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> jwtLogin(@RequestBody JwtTokenRequest request) {
+        return ResponseEntity.ok(authService.loginWithJwt(request));
+    }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        loginService.logout();
+    public ResponseEntity<Void> logout(@RequestBody JwtTokenRequest request) {
+        authService.logout(request);
         return ResponseEntity.ok().build();
     }
 }
