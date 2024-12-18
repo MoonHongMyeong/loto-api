@@ -4,92 +4,88 @@ import gg.loto.global.auth.exception.TokenException;
 import gg.loto.global.exception.ErrorCode;
 import gg.loto.user.domain.User;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
-    @Value("${jwt.secret}")
-    private String secretKey;
+    @Value("${jwt.secret-key}")
+    private String SECRET_KEY;
 
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 10; // 10분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 365; // 1년
+    @Value("${jwt.access-token-expiration}")
+    private long ACCESS_TOKEN_EXPIRATION;
+
+    @Value("${jwt.refresh-token-expiration}")
+    private long REFRESH_TOKEN_EXPIRATION;
+
+    private SecretKey key;
 
     @PostConstruct
     protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        byte[] keyBytes = Base64.getEncoder()
+                            .encode(SECRET_KEY.getBytes());
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateAccessToken(User user) {
-        Claims claims = Jwts.claims();
-        claims.put("id", user.getId());
-        claims.put("discordId", user.getDiscordId());
-        claims.put("nickname", user.getNickname());
-
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+                .claims()
+                    .add("id", user.getId())
+                    .add("discordId", user.getDiscordId())
+                    .add("nickname", user.getNickname())
+                    .and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(key)
                 .compact();
     }
 
     public String generateRefreshToken(User user) {
-        Claims claims = Jwts.claims();
-        claims.put("id", user.getId());
-
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+                .claims()
+                    .add("id", user.getId())
+                    .and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .signWith(key)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token);
-                    
-            return !claims.getBody().getExpiration().before(new Date());
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            throw new TokenException(token, ErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
             throw new TokenException(token, ErrorCode.EXPIRED_TOKEN);
-        } catch (JwtException e) {
+        } catch (UnsupportedJwtException e) {
+            throw new TokenException(token, ErrorCode.INVALID_TOKEN);
+        } catch (IllegalArgumentException e) {
             throw new TokenException(token, ErrorCode.INVALID_TOKEN);
         }
     }
 
-    public Claims getClaims(String token) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(secretKey.getBytes())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
-        }
-    }
-
     public Long getUserId(String token) {
-        return getClaims(token).get("id", Long.class);
-    }
-
-    public boolean isTokenExpired(String token) {
-        try {
-            Claims claims = getClaims(token);
-            return claims.getExpiration().before(new Date());
-        } catch (ExpiredJwtException e) {
-            return true;
-        }
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("id", Long.class);
     }
 }
