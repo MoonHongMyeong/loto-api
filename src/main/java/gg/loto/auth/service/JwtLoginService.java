@@ -20,29 +20,22 @@ public class JwtLoginService {
     private final TokenRepository tokenRepository;
 
     @Transactional
-    public TokenResponse login(String requestAccessToken) {
-        Token token = tokenRepository.findByAccessToken(requestAccessToken)
+    public TokenResponse login(String requestRefreshToken) {
+        Token token = tokenRepository.findByAccessToken(requestRefreshToken)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.TOKEN_NOT_FOUND));
 
-        if (token.isAccessTokenExpired()) {
-            if (token.isRefreshTokenExpired()) {
-                throw new TokenException(token.getRefreshToken(), ErrorCode.EXPIRED_REFRESH_TOKEN);
-            }
-
-            if (!jwtTokenProvider.validateToken(token.getRefreshToken())) {
-                throw new TokenException(token.getRefreshToken(), ErrorCode.INVALID_TOKEN);
-            }
-
-            String newAccessToken = jwtTokenProvider.generateAccessToken(token.getUser());
-            LocalDateTime newExpiresAt = LocalDateTime.now().plusMinutes(10);
-
-            token.updateAccessToken(newAccessToken, newExpiresAt);
-            return TokenResponse.from(token);
+        if (token.isRefreshTokenExpired()) {
+            throw new TokenException(token.getRefreshToken(), ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
-        if (!jwtTokenProvider.validateToken(token.getAccessToken())) {
-            throw new TokenException(token.getAccessToken(), ErrorCode.INVALID_TOKEN);
+        if (!jwtTokenProvider.validateToken(token.getRefreshToken())) {
+            throw new TokenException(token.getRefreshToken(), ErrorCode.INVALID_TOKEN);
         }
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(token.getUser());
+        LocalDateTime newExpiresAt = LocalDateTime.now().plusMinutes(10);
+
+        token.updateAccessToken(newAccessToken, newExpiresAt);
 
         return TokenResponse.from(token);
     }

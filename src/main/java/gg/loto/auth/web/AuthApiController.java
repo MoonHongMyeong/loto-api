@@ -38,8 +38,8 @@ public class AuthApiController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> jwtLogin(@RequestHeader("Authorization") String token) {
-        TokenResponse tokenResponse = authService.loginWithJwt(token.replace("bearer ", ""));
+    public ResponseEntity<AuthResponse> jwtLogin(@CookieValue("refreshToken") String refreshToken) {
+        TokenResponse tokenResponse = authService.loginWithJwt(refreshToken);
         return ResponseEntity.ok(AuthResponse.from(tokenResponse));
     }
 
