@@ -1,5 +1,7 @@
 package gg.loto.raid.entity;
 
+import gg.loto.global.exception.ErrorCode;
+import gg.loto.raid.exception.RaidException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,68 +36,68 @@ public enum RaidType {
             case VALTAN -> switch(difficulty){
                 case NORMAL -> 1415;
                 case HARD, HELL -> 1445;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case VYKAS -> switch (difficulty){
                 case NORMAL -> 1430;
                 case HARD, HELL -> 1460;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case KOUKUSATON -> switch (difficulty){
                 case NORMAL, HELL -> 1475;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case ABRELSHUD -> switch (difficulty){
                 case NORMAL -> 1490;
                 case HARD -> 1540;
                 case HELL -> 1560;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case ILLIAKKAN -> switch (difficulty){
                 case NORMAL -> 1580;
                 case HARD -> 1600;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case KAMEN -> switch(difficulty){
                 case NORMAL -> 1610;
                 case HARD -> 1630;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case KAYANGEL -> switch (difficulty){
                 case NORMAL -> 1540;
                 case HARD -> 1580;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case IVORYTOWER -> switch (difficulty){
                 case NORMAL -> 1600;
                 case HARD -> 1620;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case ECHIDNA -> switch (difficulty){
                 case NORMAL -> 1620;
                 case HARD -> 1640;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case BEHEMOTH -> switch (difficulty){
                 case NORMAL -> 1640;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case KAZEROTH_STAGE1_EGIR -> switch (difficulty){
                 case NORMAL -> 1660;
                 case HARD -> 1680;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
             case KAZEROTH_STAGE2_ABRELSHUD -> switch (difficulty){
                 case NORMAL -> 1670;
                 case HARD -> 1690;
-                default -> throw new IllegalArgumentException("지원하지 않는 난이도입니다");
+                default -> throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
             };
         };
     }
 
     public int getRequiredItemLevelForStage(Difficulty difficulty, int stage){
         if (!isValidStage(stage)) {
-            throw new IllegalArgumentException("유효하지 않은 관문입니다.");
+            throw new RaidException(ErrorCode.INVALID_RAID_STAGE);
         }
 
         if (this == ABRELSHUD && difficulty == Difficulty.NORMAL) {
@@ -104,7 +106,7 @@ public enum RaidType {
                 case 2 -> 1500;
                 case 3 -> 1520;
                 case 4 -> 1540;
-                default -> throw new IllegalArgumentException("유효하지 않은 관문입니다.");
+                default -> throw new RaidException(ErrorCode.INVALID_RAID_STAGE);
             };
         }
 
@@ -113,7 +115,7 @@ public enum RaidType {
                 case 1, 2 -> 1540;
                 case 3 -> 1550;
                 case 4 -> 1560;
-                default -> throw new IllegalArgumentException("유효하지 않은 관문입니다.");
+                default -> throw new RaidException(ErrorCode.INVALID_RAID_STAGE);
             };
         }
 

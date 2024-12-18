@@ -2,6 +2,8 @@ package gg.loto.character.service;
 
 import gg.loto.character.domain.Characters;
 import gg.loto.character.repository.CharactersRepository;
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,6 @@ public class CharacterFindDao {
 
     public Characters findById(Long id){
         return characterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캐릭터입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CHARACTER_NOT_FOUND));
     }
 }

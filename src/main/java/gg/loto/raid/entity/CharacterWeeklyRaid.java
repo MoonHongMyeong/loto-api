@@ -2,6 +2,8 @@ package gg.loto.raid.entity;
 
 import gg.loto.character.domain.Characters;
 import gg.loto.global.entity.BaseEntity;
+import gg.loto.global.exception.ErrorCode;
+import gg.loto.raid.exception.RaidException;
 import gg.loto.raid.web.dto.RaidUpdateRequest;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -35,7 +37,7 @@ public class CharacterWeeklyRaid extends BaseEntity {
     @Builder
     public CharacterWeeklyRaid(Characters character, RaidType raidType, Difficulty difficulty, int stage){
         if ( !raidType.isValidStage(stage) ){
-            throw new IllegalArgumentException("유효하지 않은 관문입니다.");
+            throw new RaidException(ErrorCode.INVALID_RAID_STAGE);
         }
         this.character = character;
         this.raidType = raidType;
@@ -48,25 +50,28 @@ public class CharacterWeeklyRaid extends BaseEntity {
         try {
             newDifficulty = Difficulty.valueOf(dto.getDifficulty().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("유효하지 않은 난이도입니다: " + dto.getDifficulty());
+            throw new RaidException(ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
         }
 
         if (!this.raidType.canEnterWithDifficulty(newDifficulty)) {
-            throw new IllegalArgumentException(
+            throw new RaidException(
                     String.format("해당 레이드(%s)는 %s 난이도를 지원하지 않습니다.",
-                            this.raidType, newDifficulty));
+                            this.raidType, newDifficulty),
+                    ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
         }
 
         if (!this.raidType.isValidStage(dto.getStage())) {
-            throw new IllegalArgumentException(
+            throw new RaidException(
                     String.format("유효하지 않은 관문 번호입니다. 레이드: %s, 관문: %d",
-                            this.raidType, dto.getStage()));
+                            this.raidType, dto.getStage()),
+                    ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
         }
 
         int requiredLevel = this.raidType.getRequiredItemLevel(newDifficulty);
         if (Integer.parseInt(this.character.getItemMaxLevel()) < requiredLevel) {
-            throw new IllegalArgumentException(
-                    String.format("아이템 레벨이 부족합니다. 필요 레벨: %d", requiredLevel));
+            throw new RaidException(
+                    String.format("아이템 레벨이 부족합니다. 필요 레벨: %d", requiredLevel),
+                    ErrorCode.UNSUPPORTED_RAID_DIFFICULTY);
         }
 
         boolean isDuplicate = this.character.getWeeklyRaids().stream()
@@ -78,7 +83,7 @@ public class CharacterWeeklyRaid extends BaseEntity {
                 );
 
         if (isDuplicate) {
-            throw new IllegalStateException("이미 체크한 레이드입니다.");
+            throw new RaidException(ErrorCode.DUPLICATE_RAID_CHECK);
         }
 
         // 모든 검증을 통과한 경우에만 업데이트

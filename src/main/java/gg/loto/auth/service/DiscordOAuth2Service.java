@@ -4,10 +4,10 @@ import gg.loto.auth.domain.Token;
 import gg.loto.auth.repository.TokenRepository;
 import gg.loto.auth.web.dto.DiscordTokenResponse;
 import gg.loto.auth.web.dto.DiscordUserInfo;
+import gg.loto.auth.web.dto.TokenResponse;
 import gg.loto.global.auth.provider.JwtTokenProvider;
 import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
-import gg.loto.user.web.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -40,7 +40,7 @@ public class DiscordOAuth2Service{
     private String redirectUri;
 
     @Transactional
-    public UserResponse login(String requestCode) {
+    public TokenResponse login(String requestCode) {
         DiscordTokenResponse discordToken = getDiscordToken(requestCode);
         DiscordUserInfo userInfo = getDiscordUserInfo(discordToken.getAccessToken());
 
@@ -61,7 +61,7 @@ public class DiscordOAuth2Service{
                 .refreshTokenExpiresAt(LocalDateTime.now().plusYears(1))
                 .build()));
 
-        return UserResponse.from(token.get());
+        return TokenResponse.from(token.get());
     }
 
     @Transactional
@@ -110,6 +110,4 @@ public class DiscordOAuth2Service{
         ).getBody();
     }
 
-    public void logout() {
-    }
 }

@@ -1,5 +1,7 @@
 package gg.loto.user.service;
 
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.user.domain.User;
 import gg.loto.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,6 @@ public class UserFindDao {
     @Transactional(readOnly = true)
     public User findById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 }

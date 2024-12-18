@@ -1,7 +1,6 @@
 package gg.loto.auth.service;
 
-import gg.loto.auth.web.dto.JwtTokenRequest;
-import gg.loto.user.web.dto.UserResponse;
+import gg.loto.auth.web.dto.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +10,19 @@ public class AuthService {
     private final DiscordOAuth2Service discordOAuth2Service;
     private final JwtLoginService jwtLoginService;
     
-    public UserResponse loginWithDiscord(String code) {
+    public TokenResponse loginWithDiscord(String code) {
         return discordOAuth2Service.login(code);
     }
     
-    public UserResponse loginWithJwt(JwtTokenRequest request) {
-        return jwtLoginService.login(request);
+    public TokenResponse loginWithJwt(String token) {
+        return jwtLoginService.login(token);
     }
     
-    public void logout(JwtTokenRequest request) {
-        jwtLoginService.logout(request);
+    public void logout(Long userId) {
+        jwtLoginService.logout(userId);
+    }
+
+    public TokenResponse refreshToken(String token) {
+        return jwtLoginService.refreshToken(token);
     }
 } 

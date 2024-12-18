@@ -30,6 +30,6 @@ public class UserApiController {
 
     @GetMapping("/me")
     public ResponseEntity<User> getMyProfile(@LoginUser User user){
-        return ResponseEntity.ok(userService.showProfile(user));
+        return ResponseEntity.ok(user);
     }
 }

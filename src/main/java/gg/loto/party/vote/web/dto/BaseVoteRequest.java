@@ -1,6 +1,8 @@
 package gg.loto.party.vote.web.dto;
 
 import gg.loto.global.entity.BaseEntity;
+import gg.loto.global.exception.ErrorCode;
+import gg.loto.party.exception.VoteException;
 import gg.loto.raid.entity.Difficulty;
 import gg.loto.raid.entity.RaidType;
 
@@ -11,17 +13,17 @@ public abstract class BaseVoteRequest extends BaseEntity {
                                        int targetGateNumber, LocalDateTime voteExpiresAt,
                                        LocalDateTime raidDatetime) {
         if (voteExpiresAt.isBefore(raidDatetime)) {
-            throw new IllegalArgumentException("투표 마감 시간은 레이드 시작 시간 이전이어야 합니다.");
+            throw new VoteException(ErrorCode.INVALID_VOTE_EXPIRY_TIME);
         }
 
         RaidType raidTypeEnum = RaidType.valueOf(raidType);
         Difficulty difficultyEnum = Difficulty.valueOf(difficulty);
 
         if (!raidTypeEnum.isValidStage(targetGateNumber)) {
-            throw new IllegalArgumentException("유효하지 않은 관문 번호입니다.");
+            throw new VoteException(ErrorCode.INVALID_RAID_GATE_NUMBER);
         }
         if (!raidTypeEnum.canEnterWithDifficulty(difficultyEnum)) {
-            throw new IllegalArgumentException("유효하지 않은 난이도입니다.");
+            throw new VoteException(ErrorCode.INVALID_RAID_DIFFICULTY);
         }
     }
 }

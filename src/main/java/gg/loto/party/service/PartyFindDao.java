@@ -1,5 +1,7 @@
 package gg.loto.party.service;
 
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.party.domain.Party;
 import gg.loto.party.repository.PartyRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,7 @@ public class PartyFindDao {
     @Transactional(readOnly = true)
     public Party findPartyById(Long partyId) {
         return partyRepository.findById(partyId).orElseThrow( () -> {
-            throw new IllegalArgumentException("잘못된 공유방입니다.");
+            throw new EntityNotFoundException(ErrorCode.PARTY_NOT_FOUND);
         });
     }
 }

@@ -2,7 +2,10 @@ package gg.loto.party.vote.service;
 
 import gg.loto.character.domain.Characters;
 import gg.loto.character.service.CharacterFindDao;
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.party.domain.Party;
+import gg.loto.party.exception.VoteException;
 import gg.loto.party.service.PartyFindDao;
 import gg.loto.party.vote.domain.PartyRaidVote;
 import gg.loto.party.vote.domain.PartyRaidVoteParticipant;
@@ -30,12 +33,12 @@ public class PartyRaidVoteService {
 
         Party party = partyFindDao.findPartyById(partyId);
         if (!party.isPartyMember(user)) {
-            throw new IllegalArgumentException("참여한 공유방만 투표생성이 가능합니다.");
+            throw new VoteException(ErrorCode.NOT_PARTY_MEMBER_FOR_VOTE);
         }
 
         Characters character = characterFindDao.findById(dto.getCharacterId());
         if (!character.isOwnership(user)) {
-            throw new IllegalArgumentException("참여할 캐릭터는 본인의 캐릭터이어야만 합니다.");
+            throw new VoteException(ErrorCode.NOT_CHARACTER_OWNER);
         }
 
         PartyRaidVote savedVote = voteRepository.save(dto.toEntity(party, user));
@@ -51,12 +54,12 @@ public class PartyRaidVoteService {
     public VoteResponse updateVote(User user, Long voteId, VoteUpdateRequest dto) {
         dto.validate();
 
-        PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+        PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new EntityNotFoundException(ErrorCode.VOTE_NOT_FOUND));
         if ( !vote.isCreator(user) ) {
-            throw new IllegalArgumentException("투표 수정은 투표 생성자만 가능합니다.");
+            throw new VoteException(ErrorCode.NOT_VOTE_CREATOR);
         }
         if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
-            throw new IllegalArgumentException("투표 상태가 진행중이 아닙니다.");
+            throw new VoteException(ErrorCode.VOTE_NOT_IN_PROGRESS);
         }
 
         vote.update(dto);
@@ -66,13 +69,13 @@ public class PartyRaidVoteService {
 
     @Transactional
     public VoteResponse cancelVote(User user, Long voteId) {
-        PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+        PartyRaidVote vote = voteRepository.findById(voteId).orElseThrow(() -> new EntityNotFoundException(ErrorCode.VOTE_NOT_FOUND));
 
         if ( !vote.isCreator(user) ) {
-            throw new IllegalArgumentException("투표 취소는 투표 생성자만 가능합니다.");
+            throw new VoteException(ErrorCode.NOT_VOTE_CREATOR);
         }
         if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
-            throw new IllegalArgumentException("투표 상태가 진행중이 아닙니다.");
+            throw new VoteException(ErrorCode.VOTE_NOT_IN_PROGRESS);
         }
 
         vote.cancel();
@@ -83,15 +86,15 @@ public class PartyRaidVoteService {
     @Transactional
     public VoteResponse joinVote(User user, Long voteId, VoteParticipantSaveRequest dto) {
         PartyRaidVote vote = voteRepository.findById(voteId)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VOTE_NOT_FOUND));
 
         if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
-            throw new IllegalArgumentException("진행 중인 투표만 참여할 수 있습니다.");
+            throw new VoteException(ErrorCode.VOTE_NOT_IN_PROGRESS);
         }
 
         Characters character = characterFindDao.findById(dto.getCharacterId());
         if (!character.isOwnership(user)) {
-            throw new IllegalArgumentException("본인의 캐릭터만 참여할 수 있습니다.");
+            throw new VoteException(ErrorCode.NOT_CHARACTER_OWNER);
         }
 
         PartyRaidVoteParticipant participant = PartyRaidVoteParticipant.builder()
@@ -100,11 +103,11 @@ public class PartyRaidVoteService {
                 .build();
 
         if (vote.hasParticipant(participant)) {
-            throw new IllegalArgumentException("이미 참여한 캐릭터입니다.");
+            throw new VoteException(ErrorCode.VOTE_ALREADY_PARTICIPATED);
         }
 
         if (vote.isFullParty()) {
-            throw new IllegalArgumentException("제한 인원이 초과되었습니다.");
+            throw new VoteException(ErrorCode.VOTE_PARTY_FULL);
         }
 
         vote.join(participant);
@@ -114,15 +117,15 @@ public class PartyRaidVoteService {
     @Transactional
     public VoteResponse leaveVote(User user, Long voteId, Long characterId) {
         PartyRaidVote vote = voteRepository.findById(voteId)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 투표 번호입니다."));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.VOTE_NOT_FOUND));
 
         if (!vote.getVoteStatus().equals(VoteStatus.IN_PROGRESS)) {
-            throw new IllegalArgumentException("진행 중인 투표만 취소할 수 있습니다.");
+            throw new VoteException("진행 중인 투표만 취소할 수 있습니다.", ErrorCode.VOTE_NOT_IN_PROGRESS);
         }
 
         Characters character = characterFindDao.findById(characterId);
         if (!character.isOwnership(user)) {
-            throw new IllegalArgumentException("본인의 캐릭터만 참여 취소할 수 있습니다.");
+            throw new VoteException("본인의 캐릭터만 참여 취소할 수 있습니다.", ErrorCode.NOT_CHARACTER_OWNER);
         }
 
         PartyRaidVoteParticipant participant = PartyRaidVoteParticipant.builder()
@@ -131,7 +134,7 @@ public class PartyRaidVoteService {
                 .build();
 
         if (!vote.hasParticipant(participant)) {
-            throw new IllegalArgumentException("투표에 참여하지 않은 캐릭터입니다.");
+            throw new VoteException(ErrorCode.CHARACTER_NOT_PARTICIPATED);
         }
 
         vote.leave(participant);

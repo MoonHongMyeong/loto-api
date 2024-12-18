@@ -1,7 +1,10 @@
 package gg.loto.character.domain;
 
+import gg.loto.character.exception.CharacterException;
 import gg.loto.character.web.dto.CharacterUpdateRequest;
 import gg.loto.global.entity.BaseEntity;
+import gg.loto.global.exception.EntityNotFoundException;
+import gg.loto.global.exception.ErrorCode;
 import gg.loto.party.domain.PartyMember;
 import gg.loto.raid.entity.CharacterWeeklyRaid;
 import gg.loto.user.domain.User;
@@ -87,7 +90,7 @@ public class Characters extends BaseEntity {
                             existing.getStage() == weeklyRaid.getStage()
                 );
         if (isDuplicate) {
-            throw new IllegalStateException("이미 체크된 레이드입니다.");
+            throw new CharacterException(ErrorCode.DUPLICATE_RAID_CHECK);
         }
         this.weeklyRaids.add(weeklyRaid);
     }
@@ -96,7 +99,7 @@ public class Characters extends BaseEntity {
         CharacterWeeklyRaid weeklyRaid = weeklyRaids.stream()
                     .filter(raid -> raid.getId().equals(raidId))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("삭제할 레이드가 존재하지 않습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RAID_RECORD_NOT_FOUND));
 
         this.weeklyRaids.remove(weeklyRaid);
     }
