@@ -22,7 +22,7 @@ public enum ErrorCode {
     VOTE_NOT_FOUND(404, "Vote Not Found", "잘못된 투표 번호입니다."),
     // token
     EXPIRED_TOKEN(401, "Token Is Expired", "토큰이 만료되었습니다."),
-    EXPIRED_REFRESH_TOKEN(401, "Refresh Token Is Expired", "다시 로그인해주세요."),
+    EXPIRED_REFRESH_TOKEN(403, "Refresh Token Is Expired", "다시 로그인해주세요."),
     INVALID_TOKEN(403, "Invalid Token", "잘못된 토큰입니다."),
     // open api
     INVALID_API_KEY(401, "Invalid API Key", "API 키가 유효하지 않습니다."),
