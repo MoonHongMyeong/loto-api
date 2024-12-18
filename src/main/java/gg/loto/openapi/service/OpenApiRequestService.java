@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OpenApiRequestService {
     @Value("${lostark.api-key}")
-    private final String LOSTARK_API_KEY;
+    private String LOSTARK_API_KEY;
 
     private final LostarkApiClient lostarkApiClient;
 
