@@ -23,7 +23,9 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/discord/login","/api/v1/auth/token/refresh")
+                        .requestMatchers("/api/v1/auth/discord/login",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/token/refresh")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
