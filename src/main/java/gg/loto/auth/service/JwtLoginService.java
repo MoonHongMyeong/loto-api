@@ -21,7 +21,7 @@ public class JwtLoginService {
 
     @Transactional
     public TokenResponse login(String requestRefreshToken) {
-        Token token = tokenRepository.findByAccessToken(requestRefreshToken)
+        Token token = tokenRepository.findByRefreshToken(requestRefreshToken)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.TOKEN_NOT_FOUND));
 
         if (token.isRefreshTokenExpired()) {
